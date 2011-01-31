@@ -1,5 +1,6 @@
-#include <libusb/libusb.h>
-
+#include <libusb-1.0/libusb.h>
+//#include "/usr/include/libusb-1.0/libusb.h"
+//#include <libusb.h>
 #define MAX_DEVICES_OPEN    10
 
 libusb_device_handle *open_devices[MAX_DEVICES_OPEN];
