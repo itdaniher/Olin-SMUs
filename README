@@ -3,5 +3,5 @@ This is a work-in-progress. I'm trying to get the source-measure unit for my Cir
 To compile the libusb code:
 
 gcc -c -fPIC usb.c -o usb.o
+gcc -shared -Wl,-soname,smu.so -o smu.so -lusb-1.0 usb.o 
 
-gcc -shared -Wl,-soname,libusb.so.1 -o libusb.so.1.0.1  usb.o 

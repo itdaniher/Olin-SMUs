@@ -1,7 +1,7 @@
 
 import ctypes
 
-usb = ctypes.cdll.LoadLibrary('usb.dll')
+usb = ctypes.cdll.LoadLibrary('./smu.so')
 usb.initialize()
 
 buffer = ctypes.c_buffer(64)
