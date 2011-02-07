@@ -57,3 +57,18 @@ pylab.xlabel('$I_{out}$ (amps)')
 pylab.ylabel('$I_{in}$ (amps)')
 pylab.title("Experiment 3 I-I curve for a Current Divider")
 
+
+n1 = pickle.load(open("exp4.1.p"))
+n2 = pickle.load(open("exp4.2.p"))
+n3 = pickle.load(open("exp4.3.p"))
+n4 = pickle.load(open("exp4.4.p"))
+for num in n1.keys():
+	v = 'v%s' % num
+	vars()[v] = [n1[num], n2[num], n3[num], n4[num]]
+	pylab.semilogy(vars()[v], 'o', label="%s volts" % num)
+pylab.legend(loc = 'upper right')
+pylab.xlabel('"2R" Number')
+pylab.ylabel('Current Measured')
+pylab.title("Experiment 4 : Current through R-2R Ladder Branches")
+pylab.xticks([0, 1, 2, 3, 4, 5])
+pylab.yticks([1e-6, 1e-5, 1e-4, 1e-3, 1e-2])
