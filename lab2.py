@@ -53,9 +53,12 @@ fit = dict((e**k,k*m+b) for k,v in exp1data1_cleanlog.items())
 plot(fit.keys(), fit.values(), 'r', label='fit line, slope of %.3f' % m)
 legend(loc = 'lower right')
 
+exp1data1 = dict((k,v) for k,v in exp1data1.items() if v > 0.1)
+exp1data1 = dictSort(exp1data1)
 
-
-pylab.plot(exp1data1.keys()[1:], diff(exp1data1.values())/diff(exp1data1.keys()), 'k.')
+diffdata = diff(sort(exp1data1.values()))/diff(sort(exp1data1.keys()))
+diffdata = dict(zip(sort(exp1data1.keys()), diffdata))
+loglog(diffdata.keys(), diffdata.values())
 
 exp1data2 = pickle.load(open("exp1.2.p"))
 semilogy(exp1data2.keys(), exp1data2.values(), 'k.')
