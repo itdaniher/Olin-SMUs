@@ -58,10 +58,14 @@ exp1data1 = dictSort(exp1data1)
 
 diffdata = diff(sort(exp1data1.values()))/diff(sort(exp1data1.keys()))
 diffdata = dict(zip(sort(exp1data1.keys()), diffdata))
-loglog(diffdata.keys(), diffdata.values())
+loglog(diffdata.keys(), diffdata.values(), 'k.', label='experimental data'
 xlabel('Current(I)')
 ylabel('Resistance($\Omega$)')
 title('Log-Log Plot of $\delta \Omega$ vs $\delta I$')
+
+(m, b) = polyfit(log(diffdata.keys()), log(diffdata.values()), 1)
+legend(loc = 'lower left')
+
 
 
 exp1data2 = pickle.load(open("exp1.2.p"))
@@ -79,6 +83,27 @@ tenk = pickle.load(open("exp2.3.p"))
 hunk = pickle.load(open("exp2.4.p")) 
 #hunk
 
+plot(sort(hund[0].keys()), sort(hund[1]), 'ro', label='100 $\Omega$')
+plot(sort(onek[0].keys()), sort(onek[1]), 'b^', label='1k $\Omega$')
+plot(sort(tenk[0].keys()), sort(tenk[1]), 'gs', label='10k $\Omega$')
+xlabel('Voltage(V)')
+ylabel('Voltage(V)')
+title('Plot of $V_{in}$ vs $V_{diode}$')
+legend(loc = 'lower right')
+
 plot(hund[0].keys(), hund[0].values(), 'ro', label='100 $\Omega$')
 plot(onek[0].keys(), onek[0].values(), 'b^', label='1k $\Omega$')
 plot(tenk[0].keys(), tenk[0].values(), 'gs', label='10k $\Omega$')
+xlabel('Voltage(V)')
+ylabel('Current(I)')
+title('Plot of Voltage vs Current for a Resistor and Pseudodiode in Series')
+legend(loc = 'upper left')
+
+semilogy(hund[0].keys(), hund[0].values(), 'ro', label='100 $\Omega$')
+semilogy(onek[0].keys(), onek[0].values(), 'b^', label='1k $\Omega$')
+semilogy(tenk[0].keys(), tenk[0].values(), 'gs', label='10k $\Omega$')
+xlabel('Voltage(V)')
+ylabel('Current(I)')
+title('Plot of Voltage vs Current for a Resistor and Pseudodiode in Series')
+legend(loc = 'lower right')
+
