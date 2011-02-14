@@ -2,6 +2,15 @@ import smu
 import pickle
 from import *
 
+def dictSort(d):
+	""" returns a dictionary sorted by keys """
+	our_list = d.items()
+	our_list.sort()
+	k = {}
+	for item in our_list:
+		k[item[0]] = item[1]
+	return k
+
 smu = smu.smu()
 
 data = {}
@@ -34,11 +43,19 @@ title('current-source V-I characterization of a pseudodiode')
 ylabel('Voltage(V)')
 xlabel('Log of Current(I)')
 
-exp1data1_cleanlog = dict((ln(k),v) for k,v in exp1data1.items() if v > 0.1)  
+#take naturallog of xs, filter against values less than 0.1
+exp1data1_cleanlog = dict((log(k),v) for k,v in exp1data1.items() if v > 0.1)  
+#run a first-order polyfit
 (m, b) = polyfit(exp1data1_cleanlog.keys(), exp1data1_cleanlog.values(), 1)
-fit = dict((k,k*m+b) for k,v in exp1data1_cleanlog.items())
+#undo the naturallog
+fit = dict((e**k,k*m+b) for k,v in exp1data1_cleanlog.items())
+#plot the fit line
 plot(fit.keys(), fit.values(), 'r', label='fit line, slope of %.3f' % m)
+legend(loc = 'lower right')
 
+
+
+pylab.plot(exp1data1.keys()[1:], diff(exp1data1.values())/diff(exp1data1.keys()), 'k.')
 
 exp1data2 = pickle.load(open("exp1.2.p"))
 semilogy(exp1data2.keys(), exp1data2.values(), 'k.')
@@ -46,8 +63,10 @@ title('voltage-source V-I characterization of a pseudodiode')
 ylabel('Log of Current (I)')
 xlabel('Voltage(V)')
 
-#log on current, polyfit to get U_T and I_s
-#diff(V)/pylab.diff(I)
+
+
+
+pylab.diff(I)
 
 hund = pickle.load(open("exp2.1.p"))
 #hund
