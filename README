@@ -1,7 +1,5 @@
 This is a work-in-progress. I'm trying to get the source-measure unit for my Circuits class, custom designed by Brad Minch, to work nicely with python.
 
-To compile the libusb code:
+To Build:
 
-gcc -c -fPIC usb.c -o usb.o
-gcc -shared -Wl,-soname,_smu.so -o _smu.so -lusb-1.0 usb.o 
-
+Execute 'build.sh' - requires libusb-1.0.
