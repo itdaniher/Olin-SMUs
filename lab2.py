@@ -59,17 +59,16 @@ exp1data1 = dictSort(exp1data1)
 diffdata = diff(sort(exp1data1.values()))/diff(sort(exp1data1.keys()))
 diffdata = dict(zip(sort(exp1data1.keys()), diffdata))
 loglog(diffdata.keys(), diffdata.values())
+xlabel('Current(I)')
+ylabel('Resistance($\Omega$)')
+title('Log-Log Plot of $\delta \Omega$ vs $\delta I$')
+
 
 exp1data2 = pickle.load(open("exp1.2.p"))
 semilogy(exp1data2.keys(), exp1data2.values(), 'k.')
 title('voltage-source V-I characterization of a pseudodiode')
 ylabel('Log of Current (I)')
 xlabel('Voltage(V)')
-
-
-
-
-pylab.diff(I)
 
 hund = pickle.load(open("exp2.1.p"))
 #hund
