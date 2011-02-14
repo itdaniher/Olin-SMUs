@@ -12,7 +12,7 @@ pickle.dump( data, open( "exp1.1.p", "wb" ) )
 
 pylab.semilogy(data.values(), data.keys(), 'k.')
 
-for volt in pylab.arange(.2, .7, .01):
+for volt in pylab.arange(.2, .7, .005):
 	smu.set_voltage(1, volt)
 	data[volt] = smu.get_current(1)
 
@@ -32,8 +32,12 @@ pylab.title('current-source V-I characterization of a pseudodiode')
 pylab.ylabel('Voltage(V)')
 pylab.xlabel('Log of Current(I)')
 
+exp1data1_cleanlog = dict((pylab.log(k),v) for k,v in exp1data1.items() if v > 0.1)  
+
+
+
 exp1data2 = pickle.load(open("exp1.2.p"))
-pylab.semilogy(exp1data2.values(), exp1data2.keys(), 'k.')
+pylab.semilogy(exp1data2.keys(), exp1data2.values(), 'k.')
 pylab.title('voltage-source V-I characterization of a pseudodiode')
 pylab.ylabel('Log of Current (I)')
 pylab.xlabel('Voltage(V)')
