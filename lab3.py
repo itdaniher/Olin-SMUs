@@ -18,9 +18,12 @@ def tranSweep(V_i, V_o, V_step, fileName):
 		I_e.append(smu.get_current(2))
 		#KCL Muthafucka, KCL Goddamn! -cdt
 		I_c.append(I_e[-1]-I_b[-1])
+	#should be ebc, but I'm lame and forgot.
 	pickle.dump( (I_b, I_e, I_c, V_b) , open( fileName, "wb" ) )
 
 tranSweep(0, 1, .001, "exp1.p")
 
-
+tranSweep(0, 5, .01, "exp2.100.p")
+tranSweep(0, 5, .01, "exp2.1000.p")
+tranSweep(0, 5, .01, "exp2.10000.p")
 
