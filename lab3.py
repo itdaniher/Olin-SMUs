@@ -37,3 +37,7 @@ def tranSweep(V_i, V_o, V_step, fileName):
 	pickle.dump( (V_b, V_o) , open( fileName, "wb" ) )
 
 tranSweep(0, 5, .001, 'exp3.1000.p')
+tranSweep(0, 5, .001, 'exp4.2000.p')
+tranSweep(0, 5, .001, 'exp4.3900.p')
+tranSweep(0, 5, .001, 'exp4.5100.p')
+  
