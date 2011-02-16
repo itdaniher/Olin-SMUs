@@ -27,3 +27,13 @@ tranSweep(0, 5, .01, "exp2.100.p")
 tranSweep(0, 5, .01, "exp2.1000.p")
 tranSweep(0, 5, .01, "exp2.10000.p")
 
+
+def tranSweep(V_i, V_o, V_step, fileName):
+    V_b = arange(V_i, V_o, V_step)
+	V_o = []
+	for volt in V_b:
+		smu.set_voltage(1, volt)
+		V_o.append(smu.get_voltage(2))
+	pickle.dump( (V_b, V_o) , open( fileName, "wb" ) )
+
+tranSweep(0, 5, .001, 'exp3.1000.p')
