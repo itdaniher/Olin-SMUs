@@ -1,5 +1,7 @@
 This is a work-in-progress. I'm trying to get the source-measure unit for my Circuits class, custom designed by Brad Minch, to work nicely with python.
 
+NB: Course website at ece.olin.edu/circuits/handouts/.
+
 To Build:
 
 Execute 'build.sh' - requires libusb-1.0.
