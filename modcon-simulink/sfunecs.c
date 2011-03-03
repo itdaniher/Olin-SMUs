@@ -1,6 +1,11 @@
 /*  S-Function for Olin ModCon SMU Board *****************************************************/
 /*  Giampiero Campa 13-March-09 **************************************************************/
 
+/* 
+Modified by Kevin Mehall <km@kevinmehall.net>
+Added code to sync simulation time to real time (instead of RTBlock.dll) so it can be used on Linux.
+*/ 
+
 #define NUDEV 20
 
 #define S_FUNCTION_NAME sfunecs
