@@ -23,11 +23,6 @@ def tranSweep(V_i, V_o, V_step, fileName):
 
 tranSweep(0, 1, .001, "exp1.p")
 
-tranSweep(0, 5, .01, "exp2.100.p")
-tranSweep(0, 5, .01, "exp2.1000.p")
-tranSweep(0, 5, .01, "exp2.10000.p")
-
-
 def tranSweep(V_i, V_o, V_step, fileName):
     V_b = arange(V_i, V_o, V_step)
 	V_o = []
