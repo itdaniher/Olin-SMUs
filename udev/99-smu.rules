@@ -1,1 +1,1 @@
-SYSFS{idVendor}=="6666", SYSFS{idProduct}=="ABCD", MODE="0666"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="6666", MODE="0666"
