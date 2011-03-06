@@ -1,0 +1,11 @@
+This is a work-in-progress. I'm trying to get the source-measure unit for my Circuits class, custom designed by Brad Minch, to work nicely with python.
+
+NB: Course website at ece.olin.edu/circuits/handouts/.
+
+To Build:
+
+Execute 'build.sh' - requires libusb-1.0.
+
+Brad Minch on SMU Filtering:
+
+ >	Each reading in the GET_MEAS_KILL60HZ vendor request represents the average of 250 ADC readings, which are taken at 66.67us intervals, which are timed by Timer2.  These are uniformly distributed over a 16.67ms interval, which is 1/60 of a second.  By doing this, we basically kill the component of the signal that is at 60 Hz.  If instead you use GET_MEAS, you wind up with an average of fewer readings taken as closely spaced as possible.  You can probably get on the order of 1000 readings per second in this case.  For low currents, the measurements will be much noisier.
