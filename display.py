@@ -1,4 +1,3 @@
-
 from Tkinter import *
 import smu
 
