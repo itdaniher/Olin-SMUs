@@ -5,10 +5,10 @@ usb.initialize()
 
 buffer = ctypes.c_buffer(64)
 
-class smu:
-
-	def __init__(self):
-		self.dev = usb.open_device(0x6666, 0xABCD, 0)
+class smu():
+	def init(self, num = 0):
+		"""Now need to manually call smu.init(), allowing for use of multiple SMUs on one system."""
+		self.dev = usb.open_device(0x6666, 0xABCD, num)
 		usb.control_transfer(self.dev, 0x00, 0x09, 1, 0, 0, buffer)
 		self.SET_FN = 0
 		self.GET_FN = 1
