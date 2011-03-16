@@ -23,16 +23,5 @@ class smu:
 		if self.dev is None:
 			sys.exit("Can't find ModCon SMU")
 
-	def setMotors(self, valMotorA, valMotorB):
-		"""Arguments should be in form of a number between 0 and 100, positive or negative. Magic numbers used for the ctrl_transfer derived from sniffing USB coms."""
-		self.valMotorA = self.processMotorValues(valMotorA)
-		self.valMotorB = self.processMotorValues(valMotorB)
-		data = [64, self.valMotorA&0xFF, self.valMotorB&0xFF, 0x00, 0x00, 0x00, 0x00, 0x00]
-		self.dev.ctrl_transfer(bmRequestType = 0x21, bRequest = 0x09, wValue = 0x0200, wIndex = 0, data_or_wLength = data)
-
-
-	def getData(self):
-		"""Sensor data is contained in the 2nd and 4th byte, with sensor IDs being contained in the 3rd and 5th byte respectively."""
-		rawData = self.getRawData()
-		sensorData = {rawData[3]: rawData[2], rawData[5]: rawData[4]}
-		return sensorData
+	data = [64, self.valMotorA&0xFF, self.valMotorB&0xFF, 0x00, 0x00, 0x00, 0x00, 0x00]
+	self.dev.ctrl_transfer(bmRequestType = 0x21, bRequest = 0x09, wValue = 0x0200, wIndex = 0, data_or_wLength = data)
