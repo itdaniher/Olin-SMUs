@@ -25,16 +25,6 @@ class smu:
 			'GET_NAME' : 11,
 			'SET_NAME' : 12}
 
-	zero = 0x07CF
-	maxV = 9.93
-	minV = -10.45
-	scaleFactorV = (minV-maxV)/(2**12)
-
-	v = 0
-	i = 0
-	master = "i"
-
-
 	def sign(self, x):
 		if x > 32767:
 			return 65536-x
@@ -43,9 +33,19 @@ class smu:
 
 	def __init__(self):
 		"""Find a USB device with the VID and PID of the ModCon SMU."""
+		#define variables
+		self.zero = 0x07CF
+		self.maxV = 9.93
+		self.minV = -10.45
+		self.scaleFactorV = (self.maxV-self.minV)/(2**12)
+		self.v = 0
+		self.i = 0
+		self.master = "i"
+		#find device
 		self.dev = usb.core.find(idVendor=0x6666, idProduct=0x0005)
 		if self.dev is None:
 			sys.exit("Can't find ModCon SMU")
+		#determine callibration values
 		VADC_VALS = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['GET_VADC_VALS'], wValue = 0, wIndex = 0, data_or_wLength = 4)
 		IADC_VALS = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['GET_IADC_VALS'], wValue = 0, wIndex = 0, data_or_wLength = 4)
 		RES_VAL = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['GET_RES_VAL'], wValue = 0, wIndex = 0, data_or_wLength = 2)
@@ -61,19 +61,20 @@ class smu:
 		self.IADCGAIN = 50*VALUE/16384.0
 		VALUE = self.sign( RES_VAL[0] | ( RES_VAL[1] << 8 ) )
 		self.RES = 51*VALUE/16384.0
-		
 
 	def update(self):
+		"""updates smu target V/I, returns actual V/I"""
 		if self.master == "v":
-			value = int(self.zero + self.v/self.scaleFactorV)
+			value = int(self.zero - self.v/self.scaleFactorV)
 			direction = 0
 		elif self.master == "i":
-			value = int(self.zero + self.i * 10000)
+			value = int(self.zero - self.i * 10000)
 			direction = 1
 		else:
 			print("bad type")
 		data = numpy.zeros(12)
 		self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.vReqs['SET_DIGOUT'], wValue = direction, wIndex = 0, data_or_wLength = data)
+		data = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['UPDATE'], wValue = value, wIndex = 0, data_or_wLength = 12)
 		data = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['UPDATE'], wValue = value, wIndex = 0, data_or_wLength = 12)
 		retVolt = ((data[0]|data[1]<<8)-self.VADC)/self.VADCGAIN
 		retAmp = ((data[4]|data[5]<<8)-self.IADC)/(self.IADCGAIN*self.RES)
