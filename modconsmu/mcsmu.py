@@ -2,17 +2,6 @@
 
 import sys
 import usb.core
-import numpy 
-"""
-if (libusb_control_transfer(udev[i], 0x00, 0x09, 1, 0, buffer, 0, 0) < 0) {
-if (libusb_control_transfer(udev[i], 0x40, SET_DIGOUT, digout, 0, buffer, 0, 0) < 0) {
-if (libusb_control_transfer(udev[i], 0xC0, GET_DAC_VALS, 0, 0, buffer, 4, 0) < 0) {
-if (libusb_control_transfer(udev[i], 0xC0, GET_VADC_VALS, 0, 0, buffer, 4, 0) < 0) {
-if (libusb_control_transfer(udev[i], 0xC0, GET_IADC_VALS, 0, 0, buffer, 4, 0) < 0) {
-if (libusb_control_transfer(udev[i], 0xC0, GET_RES_VAL, 0, 0, buffer, 2, 0) < 0) {
-if (libusb_control_transfer(udev[i], 0xC0, UPDATE, DACA, 0, buffer, 12, 0) < 0) {
-if (libusb_control_transfer(udev[i], 0xC0, UPDATE, (uint16_t)dac0[i], 0, buffer, 12, 0) < 0) {
-"""
 
 class smu:
 	vReqs = {'UPDATE' : 1, 
@@ -26,6 +15,7 @@ class smu:
 			'SET_NAME' : 12}
 
 	def sign(self, x):
+		"""Undo two's complement signing."""
 		if x > 32767:
 			return 65536-x
 		else:
@@ -68,11 +58,11 @@ class smu:
 			value = int(self.zero - self.v/self.scaleFactorV)
 			direction = 0
 		elif self.master == "i":
-			value = int(self.zero - self.i * 10000)
+			value = int(self.zero + self.i * 10000)
 			direction = 1
 		else:
 			print("bad type")
-		data = numpy.zeros(12)
+		data = [0]*12
 		self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.vReqs['SET_DIGOUT'], wValue = direction, wIndex = 0, data_or_wLength = data)
 		data = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['UPDATE'], wValue = value, wIndex = 0, data_or_wLength = 12)
 		data = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['UPDATE'], wValue = value, wIndex = 0, data_or_wLength = 12)
