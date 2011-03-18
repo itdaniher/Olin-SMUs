@@ -1,4 +1,4 @@
-#Ian Daniher - Mar11 2011
+#Ian Daniher - Mar11-17 2011
 
 import sys
 import usb.core
@@ -31,6 +31,7 @@ class smu:
 		self.v = 0
 		self.i = 0
 		self.master = "i"
+		self.updateNeeded = 0
 		#find device
 		self.dev = usb.core.find(idVendor=0x6666, idProduct=0x0005)
 		if self.dev is None:
@@ -62,9 +63,9 @@ class smu:
 			direction = 1
 		else:
 			print("bad type")
-		data = [0]*12
-		self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.vReqs['SET_DIGOUT'], wValue = direction, wIndex = 0, data_or_wLength = data)
-		data = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['UPDATE'], wValue = value, wIndex = 0, data_or_wLength = 12)
+		if self.updateNeeded == 1:
+			self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.vReqs['SET_DIGOUT'], wValue = direction, wIndex = 0, data_or_wLength = [0]*12)
+			self.updateNeeded = 0
 		data = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['UPDATE'], wValue = value, wIndex = 0, data_or_wLength = 12)
 		retVolt = ((data[0]|data[1]<<8)-self.VADC)/self.VADCGAIN
 		retAmp = ((data[4]|data[5]<<8)-self.IADC)/(self.IADCGAIN*self.RES)
