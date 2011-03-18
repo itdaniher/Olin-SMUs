@@ -10,8 +10,8 @@ The folder "modconsmu" is importable as a Python module and contains a pure-Pyth
 
 The folder "circuitsmu" is also importable as a Python module and largely consists of Dr. Brad Minch's intial attempts at a ctypes binding with libusb.
 
-The course website for "Introduction to MicroElectrical Circuits"(circuits) is located at (http://ece.olin.edu/circuits/).
+The course website for "Introduction to MicroElectrical Circuits"(circuits) is located at [http://ece.olin.edu/circuits/](http://ece.olin.edu/circuits/). 
 
-The course website for "Introduction to Modeling and Control"(modcon) is located at (http://ece.olin.edu/circuits/).
+The course website for "Introduction to Modeling and Control"(modcon) is located at [http://ece.olin.edu/circuits/](http://ece.olin.edu/circuits/). 
 
 The circuits SMU requires a binary library to be compiled. To do so, chdir to circuitsmu/hostDriver and execute "build.sh." This requires libusb-1.0.
