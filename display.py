@@ -1,5 +1,5 @@
 from Tkinter import *
-import smu
+import circuitsmu
 
 def ch1_mode_callback():
     meas = smu.get_meas(1)
@@ -156,7 +156,7 @@ def update_display():
     ch2auto.configure(text = disp[5])
     display.after(100, update_display)
 
-smu = smu.smu()
+smu = circuitsmu.smu()
 display.after(100, update_display)
 if __name__=='__main__':
     root.mainloop()

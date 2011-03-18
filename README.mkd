@@ -1,11 +1,17 @@
-This is a work-in-progress. I'm trying to get the source-measure unit for my Circuits class, custom designed by Brad Minch, to work nicely with python.
+Beta release of Python drivers for the Olin Source Measure Units(SMU.)
 
-NB: Course website at ece.olin.edu/circuits/handouts/.
+Hardware designed by Dr. Gill Pratt and Dr. Brad Minch.
 
-To Build:
+Software written by Ian Daniher and Dr. Brad Minch.
 
-Execute 'build.sh' - requires libusb-1.0.
+The folder "modconsmu" is importable as a Python module and contains a pure-Python driver using pyusb, installable on Ubuntu by the command
 
-Brad Minch on SMU Filtering:
+	sudo apt-get install python-usb.
 
- >	Each reading in the GET_MEAS_KILL60HZ vendor request represents the average of 250 ADC readings, which are taken at 66.67us intervals, which are timed by Timer2.  These are uniformly distributed over a 16.67ms interval, which is 1/60 of a second.  By doing this, we basically kill the component of the signal that is at 60 Hz.  If instead you use GET_MEAS, you wind up with an average of fewer readings taken as closely spaced as possible.  You can probably get on the order of 1000 readings per second in this case.  For low currents, the measurements will be much noisier.
+The folder "circuitsmu" is also importable as a Python module and largely consists of Dr. Brad Minch's intial attempts at a ctypes binding with libusb.
+
+The course website for "Introduction to MicroElectrical Circuits"(circuits) is located at (http://ece.olin.edu/circuits/).
+
+The course website for "Introduction to Modeling and Control"(modcon) is located at (http://ece.olin.edu/circuits/).
+
+The circuits SMU requires a binary library to be compiled. To do so, chdir to circuitsmu/hostDriver and execute "build.sh." This requires libusb-1.0.
