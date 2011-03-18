@@ -12,6 +12,6 @@ The folder "circuitsmu" is also importable as a Python module and largely consis
 
 The course website for "Introduction to MicroElectrical Circuits"(circuits) is located at [http://ece.olin.edu/circuits/](http://ece.olin.edu/circuits/). 
 
-The course website for "Introduction to Modeling and Control"(modcon) is located at [http://ece.olin.edu/circuits/](http://ece.olin.edu/circuits/). 
+The course website for "Introduction to Modeling and Control"(modcon) is located at [http://ece.olin.edu/mc/](http://ece.olin.edu/mc/). 
 
 The circuits SMU requires a binary library to be compiled. To do so, chdir to circuitsmu/hostDriver and execute "build.sh." This requires libusb-1.0.
