@@ -522,7 +522,5 @@ class smu():
 			print "Illegal channel number specified.\n"
 
 	def zero(self):
-		self.set_voltage(1, 0)
-		self.set_voltage(2, 0)
 		self.set_current(1, 0)
 		self.set_current(2, 0)
