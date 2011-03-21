@@ -1,2 +1,5 @@
 *.pyc
-labs
+*.p
+*.png
+*.tar
+labs/*/
