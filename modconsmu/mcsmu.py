@@ -30,7 +30,7 @@ class smu:
 		self.scaleFactorV = (self.maxV-self.minV)/(2**12)
 		self.v = 0
 		self.i = 0
-		self.master = "i"
+		self.driving = "i"
 		self.updateNeeded = 0
 		#find device
 		self.dev = usb.core.find(idVendor=0x6666, idProduct=0x0005)
@@ -55,10 +55,10 @@ class smu:
 
 	def update(self):
 		"""updates smu target V/I, returns actual V/I"""
-		if self.master == "v":
+		if self.driving == 'v':
 			value = int(self.zero - self.v/self.scaleFactorV)
 			direction = 0
-		elif self.master == "i":
+		elif self.driving == 'i':
 			value = int(self.zero + self.i * 10000)
 			direction = 1
 		else:
@@ -70,3 +70,24 @@ class smu:
 		retVolt = ((data[0]|data[1]<<8)-self.VADC)/self.VADCGAIN
 		retAmp = ((data[4]|data[5]<<8)-self.IADC)/(self.IADCGAIN*self.RES)
 		return (retVolt, retAmp)
+
+	def set(self, volts = None, amps = None):
+		"""simpler functional interface to the SMU"""
+		if volts and amps != None:
+			raise NotImplementedError
+		else:
+			if volts != None:
+				if self.driving == 'v':
+					self.v = volts
+				elif self.driving == 'i':
+					self.v = volts
+					self.driving = 'v'
+					self.updateNeeded = 1
+			elif amps != None:
+				if self.driving == 'i':
+					self.i = amps
+				elif self.driving == 'v':
+					self.i = amps
+					self.driving = 'i'
+					self.updateNeeded = 1
+			self.update()
