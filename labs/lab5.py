@@ -26,6 +26,12 @@ def FETSweep(V_i, V_o, V_step, fileName):
     pickle.dump( (I_s, V_s) , open( fileName, "wb" ) )
     return (I_s, V_s)
 
+def ZerO(smu):
+	smu.set_voltage(1, 0)
+	smu.set_voltage(2, 0)
+	smu.set_current(1, 0)
+	smu.set_current(2, 0)
+
 V_thresh = .7
 
 smu.set_voltage(1, V_thresh-.1)

@@ -2,9 +2,6 @@ import usb.core
 
 
 class smu():
-	def ord(a, b = None, c = None):
-		"""massive cludge. I appologize profusely."""
-		return a
 	def __init__(self, num = 0):
 		"""Now need to manually call smu.init(), allowing for use of multiple SMUs on one system."""
 		self.buffer = 64*[0]
@@ -75,9 +72,15 @@ class smu():
 			done = 0
 			while not done:
 				buffer = self.dev.ctrl_transfer(0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6)
-				res = abs(((self.ord(buffer[1])<<8)|self.ord(buffer[0]))-((self.ord(buffer[3])<<8)|self.ord(buffer[2])))
-				range = self.ord(buffer[4])
-				fn = self.ord(buffer[5])
+<<<<<<< HEAD
+				res = abs(((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2])))
+				range = ord(buffer[4])
+				fn = ord(buffer[5])
+=======
+				res = abs(((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2])))
+				range = ord(buffer[4])
+				fn = ord(buffer[5])
+>>>>>>> 4fd112d5f7c11e69db04b50a3ad1a5b4db22f3f9
 				if fn==self.SRCV_MEASI:
 					if (res>2000) and (range!=self._20MA):
 						range = range-1
@@ -113,7 +116,11 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(0xC0, self.GET_AUTORANGE, 0, ch, 1)
-			return self.ord(buffer[0])
+<<<<<<< HEAD
+			return ord(buffer[0])
+=======
+			return ord(buffer[0])
+>>>>>>> 4fd112d5f7c11e69db04b50a3ad1a5b4db22f3f9
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -145,39 +152,75 @@ class smu():
 		"""
 		buffer = self.dev.ctrl_transfer(0xC0, self.GET_DISPLAY, 0, 1, 24)
 		ret = []
-		if self.ord(buffer[5])==self.SRCV_MEASI:
-			value = ((self.ord(buffer[1])<<8)|self.ord(buffer[0]))-((self.ord(buffer[3])<<8)|self.ord(buffer[2]))
-			value = self.get_src_vmult[self.ord(buffer[4])]*value
-			ret.append(self.get_disp_srcv_fmt[self.ord(buffer[4])] % value)
-			value = ((self.ord(buffer[7])<<8)|self.ord(buffer[6]))-((self.ord(buffer[9])<<8)|self.ord(buffer[8]))
-			value = self.get_meas_imult[self.ord(buffer[10])]*value
-			ret.append(self.get_disp_measi_fmt[self.ord(buffer[10])] % (self.get_disp_imult[self.ord(buffer[10])]*value))
+<<<<<<< HEAD
+		if ord(buffer[5])==self.SRCV_MEASI:
+			value = ((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2]))
+			value = self.get_src_vmult[ord(buffer[4])]*value
+			ret.append(self.get_disp_srcv_fmt[ord(buffer[4])] % value)
+			value = ((ord(buffer[7])<<8)|ord(buffer[6]))-((ord(buffer[9])<<8)|ord(buffer[8]))
+			value = self.get_meas_imult[ord(buffer[10])]*value
+			ret.append(self.get_disp_measi_fmt[ord(buffer[10])] % (self.get_disp_imult[ord(buffer[10])]*value))
 		else:
-			value = ((self.ord(buffer[1])<<8)|self.ord(buffer[0]))-((self.ord(buffer[3])<<8)|self.ord(buffer[2]))
-			value = self.get_src_imult[self.ord(buffer[4])]*value
-			ret.append(self.get_disp_srci_fmt[self.ord(buffer[4])] % (self.get_disp_imult[self.ord(buffer[4])]*value))
-			value = ((self.ord(buffer[7])<<8)|self.ord(buffer[6]))-((self.ord(buffer[9])<<8)|self.ord(buffer[8]))
-			value = self.get_meas_vmult[self.ord(buffer[10])]*value
-			ret.append(self.get_disp_measv_fmt[self.ord(buffer[10])] % value)
-		if self.ord(buffer[11])==self.ON:
+			value = ((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2]))
+			value = self.get_src_imult[ord(buffer[4])]*value
+			ret.append(self.get_disp_srci_fmt[ord(buffer[4])] % (self.get_disp_imult[ord(buffer[4])]*value))
+			value = ((ord(buffer[7])<<8)|ord(buffer[6]))-((ord(buffer[9])<<8)|ord(buffer[8]))
+			value = self.get_meas_vmult[ord(buffer[10])]*value
+			ret.append(self.get_disp_measv_fmt[ord(buffer[10])] % value)
+		if ord(buffer[11])==self.ON:
 			ret.append(u'AUTO')
 		else:
 			ret.append(u'	')
-		if self.ord(buffer[17])==self.SRCV_MEASI:
-			value = ((self.ord(buffer[13])<<8)|self.ord(buffer[12]))-((self.ord(buffer[15])<<8)|self.ord(buffer[14]))
-			value = self.get_src_vmult[self.ord(buffer[16])]*value
-			ret.append(self.get_disp_srcv_fmt[self.ord(buffer[16])] % value)
-			value = ((self.ord(buffer[19])<<8)|self.ord(buffer[18]))-((self.ord(buffer[21])<<8)|self.ord(buffer[20]))
-			value = self.get_meas_imult[self.ord(buffer[22])]*value
-			ret.append(self.get_disp_measi_fmt[self.ord(buffer[22])] % (self.get_disp_imult[self.ord(buffer[22])]*value))
+		if ord(buffer[17])==self.SRCV_MEASI:
+			value = ((ord(buffer[13])<<8)|ord(buffer[12]))-((ord(buffer[15])<<8)|ord(buffer[14]))
+			value = self.get_src_vmult[ord(buffer[16])]*value
+			ret.append(self.get_disp_srcv_fmt[ord(buffer[16])] % value)
+			value = ((ord(buffer[19])<<8)|ord(buffer[18]))-((ord(buffer[21])<<8)|ord(buffer[20]))
+			value = self.get_meas_imult[ord(buffer[22])]*value
+			ret.append(self.get_disp_measi_fmt[ord(buffer[22])] % (self.get_disp_imult[ord(buffer[22])]*value))
 		else:
-			value = ((self.ord(buffer[13])<<8)|self.ord(buffer[12]))-((self.ord(buffer[15])<<8)|self.ord(buffer[14]))
-			value = self.get_src_imult[self.ord(buffer[16])]*value
-			ret.append(self.get_disp_srci_fmt[self.ord(buffer[16])] % (self.get_disp_imult[self.ord(buffer[16])]*value))
-			value = ((self.ord(buffer[19])<<8)|self.ord(buffer[18]))-((self.ord(buffer[21])<<8)|self.ord(buffer[20]))
-			value = self.get_meas_vmult[self.ord(buffer[22])]*value
-			ret.append(self.get_disp_measv_fmt[self.ord(buffer[22])] % value)
-		if self.ord(buffer[23])==self.ON:
+			value = ((ord(buffer[13])<<8)|ord(buffer[12]))-((ord(buffer[15])<<8)|ord(buffer[14]))
+			value = self.get_src_imult[ord(buffer[16])]*value
+			ret.append(self.get_disp_srci_fmt[ord(buffer[16])] % (self.get_disp_imult[ord(buffer[16])]*value))
+			value = ((ord(buffer[19])<<8)|ord(buffer[18]))-((ord(buffer[21])<<8)|ord(buffer[20]))
+			value = self.get_meas_vmult[ord(buffer[22])]*value
+			ret.append(self.get_disp_measv_fmt[ord(buffer[22])] % value)
+		if ord(buffer[23])==self.ON:
+=======
+		if ord(buffer[5])==self.SRCV_MEASI:
+			value = ((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2]))
+			value = self.get_src_vmult[ord(buffer[4])]*value
+			ret.append(self.get_disp_srcv_fmt[ord(buffer[4])] % value)
+			value = ((ord(buffer[7])<<8)|ord(buffer[6]))-((ord(buffer[9])<<8)|ord(buffer[8]))
+			value = self.get_meas_imult[ord(buffer[10])]*value
+			ret.append(self.get_disp_measi_fmt[ord(buffer[10])] % (self.get_disp_imult[ord(buffer[10])]*value))
+		else:
+			value = ((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2]))
+			value = self.get_src_imult[ord(buffer[4])]*value
+			ret.append(self.get_disp_srci_fmt[ord(buffer[4])] % (self.get_disp_imult[ord(buffer[4])]*value))
+			value = ((ord(buffer[7])<<8)|ord(buffer[6]))-((ord(buffer[9])<<8)|ord(buffer[8]))
+			value = self.get_meas_vmult[ord(buffer[10])]*value
+			ret.append(self.get_disp_measv_fmt[ord(buffer[10])] % value)
+		if ord(buffer[11])==self.ON:
+			ret.append(u'AUTO')
+		else:
+			ret.append(u'	')
+		if ord(buffer[17])==self.SRCV_MEASI:
+			value = ((ord(buffer[13])<<8)|ord(buffer[12]))-((ord(buffer[15])<<8)|ord(buffer[14]))
+			value = self.get_src_vmult[ord(buffer[16])]*value
+			ret.append(self.get_disp_srcv_fmt[ord(buffer[16])] % value)
+			value = ((ord(buffer[19])<<8)|ord(buffer[18]))-((ord(buffer[21])<<8)|ord(buffer[20]))
+			value = self.get_meas_imult[ord(buffer[22])]*value
+			ret.append(self.get_disp_measi_fmt[ord(buffer[22])] % (self.get_disp_imult[ord(buffer[22])]*value))
+		else:
+			value = ((ord(buffer[13])<<8)|ord(buffer[12]))-((ord(buffer[15])<<8)|ord(buffer[14]))
+			value = self.get_src_imult[ord(buffer[16])]*value
+			ret.append(self.get_disp_srci_fmt[ord(buffer[16])] % (self.get_disp_imult[ord(buffer[16])]*value))
+			value = ((ord(buffer[19])<<8)|ord(buffer[18]))-((ord(buffer[21])<<8)|ord(buffer[20]))
+			value = self.get_meas_vmult[ord(buffer[22])]*value
+			ret.append(self.get_disp_measv_fmt[ord(buffer[22])] % value)
+		if ord(buffer[23])==self.ON:
+>>>>>>> 4fd112d5f7c11e69db04b50a3ad1a5b4db22f3f9
 			ret.append(u'AUTO')
 		else:
 			ret.append(u'	')
@@ -191,7 +234,11 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(0xC0, self.GET_FN, 0, ch, 1)
-			return self.ord(buffer[0])
+<<<<<<< HEAD
+			return ord(buffer[0])
+=======
+			return ord(buffer[0])
+>>>>>>> 4fd112d5f7c11e69db04b50a3ad1a5b4db22f3f9
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -212,7 +259,11 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(0xC0, self.GET_IRANGE, 0, ch, 1, buffer)
-			return self.ord(buffer[0])
+<<<<<<< HEAD
+			return ord(buffer[0])
+=======
+			return ord(buffer[0])
+>>>>>>> 4fd112d5f7c11e69db04b50a3ad1a5b4db22f3f9
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -231,12 +282,21 @@ class smu():
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6)
 			ret = []
-			value = ((self.ord(buffer[1])<<8)|self.ord(buffer[0]))-((self.ord(buffer[3])<<8)|self.ord(buffer[2]))
-			if self.ord(buffer[5])==self.SRCV_MEASI:
-				value = value*self.get_meas_imult[self.ord(buffer[4])]
+<<<<<<< HEAD
+			value = ((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2]))
+			if ord(buffer[5])==self.SRCV_MEASI:
+				value = value*self.get_meas_imult[ord(buffer[4])]
 				units = 1
 			else:
-				value = value*self.get_meas_vmult[self.ord(buffer[4])]
+				value = value*self.get_meas_vmult[ord(buffer[4])]
+=======
+			value = ((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2]))
+			if ord(buffer[5])==self.SRCV_MEASI:
+				value = value*self.get_meas_imult[ord(buffer[4])]
+				units = 1
+			else:
+				value = value*self.get_meas_vmult[ord(buffer[4])]
+>>>>>>> 4fd112d5f7c11e69db04b50a3ad1a5b4db22f3f9
 				units = 0
 			ret.append(value)
 			ret.append(units)
@@ -259,13 +319,23 @@ class smu():
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(0xC0, self.GET_SRC, 0, ch, 6)
 			ret = []
-			value = ((self.ord(buffer[1])<<8)|self.ord(buffer[0]))-((self.ord(buffer[3])<<8)|self.ord(buffer[2]))
-			if self.ord(buffer[5])==self.SRCV_MEASI:
-				value = value*self.get_src_vmult[self.ord(buffer[4])]
+<<<<<<< HEAD
+			value = ((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2]))
+			if ord(buffer[5])==self.SRCV_MEASI:
+				value = value*self.get_src_vmult[ord(buffer[4])]
 			else:
-				value = value*self.get_src_imult[self.ord(buffer[4])]
+				value = value*self.get_src_imult[ord(buffer[4])]
 			ret.append(value)
-			ret.append(self.ord(buffer[5]))
+			ret.append(ord(buffer[5]))
+=======
+			value = ((ord(buffer[1])<<8)|ord(buffer[0]))-((ord(buffer[3])<<8)|ord(buffer[2]))
+			if ord(buffer[5])==self.SRCV_MEASI:
+				value = value*self.get_src_vmult[ord(buffer[4])]
+			else:
+				value = value*self.get_src_imult[ord(buffer[4])]
+			ret.append(value)
+			ret.append(ord(buffer[5]))
+>>>>>>> 4fd112d5f7c11e69db04b50a3ad1a5b4db22f3f9
 			return ret
 		else:
 			print "Illegal channel number specified.\n"
@@ -304,7 +374,11 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(0xC0, self.GET_VRANGE, 0, ch, 1)
-			return self.ord(buffer[0])
+<<<<<<< HEAD
+			return ord(buffer[0])
+=======
+			return ord(buffer[0])
+>>>>>>> 4fd112d5f7c11e69db04b50a3ad1a5b4db22f3f9
 		else:
 			print "Illegal channel number specified.\n"
 
