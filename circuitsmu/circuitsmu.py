@@ -1,3 +1,4 @@
+#warning. there is a bug somewhere in this code. I do not know where it is.
 import ctypes
 
 usb = ctypes.cdll.LoadLibrary("./circuitsmu/_smu.so")
