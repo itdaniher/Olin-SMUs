@@ -20,11 +20,12 @@ def showData():
 	pylab.ylabel('voltage')
 	pylab.draw()
 	while True:
+		timeNow = time.time() 
 		output.append(smu.update())
-		i.plot(time.time(), output[-1][1], 'k.')
-		v.plot(time.time(), output[-1][0], 'k.')
-		i.axis([time.time()-10,time.time()+10,-.2,.2])
-		v.axis([time.time()-10,time.time()+10,-10,10])
+		i.plot(timeNow, output[-1][1], 'k.')
+		v.plot(timeNow, output[-1][0], 'k.')
+		i.axis([timeNow-10,timeNow+1,-.2,.2])
+		v.axis([timeNow-10,timeNow+1,-10,10])
 		pylab.draw()
 		time.sleep(tick)
 
