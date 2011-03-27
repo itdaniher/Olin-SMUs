@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.134"
+    ComputedModelVersion    "1.135"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -24,11 +24,11 @@ Model {
   Creator		  "gcampa"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "km"
+  LastModifiedBy	  "it"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Nov  3 23:43:12 2010"
-  RTWModifiedTimeStamp	  0
-  ModelVersionFormat	  "1.%<AutoIncrement:134>"
+  LastModifiedDate	  "Sat Mar 26 20:39:16 2011"
+  RTWModifiedTimeStamp	  223072715
+  ModelVersionFormat	  "1.%<AutoIncrement:135>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -635,15 +635,6 @@ Model {
       SampleTime	      "-1"
     }
     Block {
-      BlockType		      Step
-      Time		      "1"
-      Before		      "0"
-      After		      "1"
-      SampleTime	      "-1"
-      VectorParams1D	      on
-      ZeroCross		      on
-    }
-    Block {
       BlockType		      TransportDelay
       DelayTime		      "1"
       InitialOutput	      "0"
@@ -764,14 +755,6 @@ Model {
       SaveName		      "ScopeData1"
       DataFormat	      "StructureWithTime"
       LimitDataPoints	      off
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Step
-      Name		      "Step"
-      SID		      8
-      Position		      [40, 125, 70, 155]
-      After		      "5"
       SampleTime	      "0"
     }
     Block {
