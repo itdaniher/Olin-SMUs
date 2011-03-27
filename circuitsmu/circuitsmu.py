@@ -247,6 +247,7 @@ class smu():
 		   chanel CH is in SI/MV mode).
 		"""
 		if (ch==1) or (ch==2):
+			self.autorange(ch)
 			ret = usb.control_transfer(self.dev, 0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6, buffer)
 			if ret<0:
 				print "Unable to send GET_MEAS_KILL60HZ vendor request.\n"
