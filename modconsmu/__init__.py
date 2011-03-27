@@ -1,1 +1,1 @@
-from mcsmu import *
+from modconsmu import *
