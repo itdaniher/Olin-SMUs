@@ -1,0 +1,5 @@
+README file for the SMU used in Olin's "Introduction to Modeling and Control" course.
+
+Fun plots can be found at http://min.us/mvfQleq.
+
+Fun uses can be found at ../apps
