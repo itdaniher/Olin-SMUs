@@ -11,7 +11,7 @@ class smu():
 	def __init__(self, num = 0):
 		"""pass smu class instantiation the number of the SMU you want to hook to - multiSMU support hack."""
 		#experimental SMU-zeroing-on-close hook
-		atexit.register(zero)
+		atexit.register(self.zero)
 		#open device from the libusb / ctypes disaster
 		self.dev = usb.open_device(0x6666, 0xABCD, num)
 		usb.control_transfer(self.dev, 0x00, 0x09, 1, 0, 0, buffer)
