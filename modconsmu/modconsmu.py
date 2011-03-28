@@ -2,6 +2,7 @@
 
 import sys
 import usb.core
+import atexit
 
 class smu:
 	vReqs = {'UPDATE' : 1, 
@@ -22,7 +23,9 @@ class smu:
 			return x
 
 	def __init__(self):
-		"""Find a USB device with the VID and PID of the ModCon SMU."""
+		"""Find a USB device with the VID and PID of the ModCon SMU."""i
+		#add safety feature
+		atexit.register(self.set(amps = 0))
 		#define variables
 		self.zero = 0x07CF
 		self.maxV = 9.93
