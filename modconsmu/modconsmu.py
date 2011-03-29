@@ -24,8 +24,6 @@ class smu:
 
 	def __init__(self):
 		"""Find a USB device with the VID and PID of the ModCon SMU."""
-		#add safety feature
-		atexit.register(self.set(amps = 0))
 		#define variables
 		self.zero = 0x07CF
 		self.maxV = 9.93
@@ -55,6 +53,8 @@ class smu:
 		self.IADCGAIN = 50*VALUE/16384.0
 		VALUE = self.sign( RES_VAL[0] | ( RES_VAL[1] << 8 ) )
 		self.RES = 51*VALUE/16384.0
+		#add safety feature
+		atexit.register(self.set(amps = 0))
 
 	def update(self):
 		"""updates smu target V/I, returns actual V/I"""
