@@ -60,9 +60,9 @@ def CCCVProfile(constantCurrent = .2, constantVoltage = 4.2):
 		print("no battery attached?")
 		print(chargeData)
 
-def charge():
+def charge(constantCurrent = .2, constantVoltage = 4.2):
 	#use threading to allow for non-blocking while-loop checks
-	chargeThread = threading.Thread(target=CCCVProfile)
+	chargeThread = threading.Thread(target=CCCVProfile, args = (constantCurrent, constantVoltage))
 	chargeThread.daemon = True
 	chargeThread.start()
 
