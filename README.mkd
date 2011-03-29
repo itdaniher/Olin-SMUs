@@ -4,7 +4,7 @@ Hardware designed by Dr. Gill Pratt and Dr. Brad Minch.
 
 Software written by Ian Daniher and Dr. Brad Minch.
 
-The folder "modconsmu" is importable as a Python module and contains a pure-Python driver using pyusb, installable on Ubuntu by the command
+The folder "modconsmu" is importable as a Python module and contains a pure-Python driver using pyusb, installable on Ubuntu by the commands
 
 	git clone git://github.com/itdaniher/pyusb.git
 	cd pyusb
