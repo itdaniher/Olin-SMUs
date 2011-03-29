@@ -31,7 +31,7 @@ def log():
 	data = ( time.time(), smu.update() )
 	chargeData.append(data)
 	if dataStream:
-		upData = "%.4f %.4f %.4f" % (data[0], data[1][0], abs(data[1][1]))
+		upData = "%.3f %.3f %.3f" % (data[0], data[1][0], abs(data[1][1]))
 		sock.send(upData)
 
 def CCCVProfile(constantCurrent = .2, constantVoltage = 4.2):
