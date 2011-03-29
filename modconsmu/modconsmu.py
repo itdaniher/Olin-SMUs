@@ -23,7 +23,7 @@ class smu:
 			return x
 
 	def __init__(self):
-		"""Find a USB device with the VID and PID of the ModCon SMU."""i
+		"""Find a USB device with the VID and PID of the ModCon SMU."""
 		#add safety feature
 		atexit.register(self.set(amps = 0))
 		#define variables
