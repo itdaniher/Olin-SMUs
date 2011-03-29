@@ -6,7 +6,9 @@ Software written by Ian Daniher and Dr. Brad Minch.
 
 The folder "modconsmu" is importable as a Python module and contains a pure-Python driver using pyusb, installable on Ubuntu by the command
 
-	sudo apt-get install python-usb.
+	git clone git://github.com/itdaniher/pyusb.git
+	cd pyusb
+	sudo python setup.py install
 
 The folder "circuitsmu" is also importable as a Python module and largely consists of Dr. Brad Minch's intial attempts at a ctypes binding with libusb.
 
