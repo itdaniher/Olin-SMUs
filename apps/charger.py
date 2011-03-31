@@ -28,7 +28,7 @@ tick = 1
 
 def log():
 	#time, (voltage, current)
-	data = ( time.time(), smu.update() )
+	data = ( time.time(), smu.update(0) )
 	chargeData.append(data)
 	if dataStream:
 		upData = "%.3f %.3f %.3f" % (data[0], data[1][0], abs(data[1][1]))
