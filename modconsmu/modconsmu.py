@@ -56,7 +56,7 @@ class smu:
 		#add safety feature
 		atexit.register(self.set(amps = 0))
 
-	def update(self):
+	def update(self, mod = 1):
 		"""updates smu target V/I, returns actual V/I"""
 		if self.driving == 'v':
 			value = int(self.zero - self.v/self.scaleFactorV)
@@ -72,7 +72,11 @@ class smu:
 		data = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['UPDATE'], wValue = value, wIndex = 0, data_or_wLength = 12)
 		retVolt = ((data[0]|data[1]<<8)-self.VADC)/self.VADCGAIN
 		retAmp = ((data[4]|data[5]<<8)-self.IADC)/(self.IADCGAIN*self.RES)
-		return (retVolt, retAmp)
+		modVolt = (data[6]|data[7]<<8)*(5.00/1023)
+		if mod:
+			return (retVolt, retAmp, modVolt)
+		else:
+			return (retVolt, retAmp)
 
 	def set(self, volts = None, amps = None):
 		"""simpler functional interface to the SMU"""
