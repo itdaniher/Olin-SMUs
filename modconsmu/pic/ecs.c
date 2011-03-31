@@ -1,48 +1,19 @@
 #include <p18f2455.h>
 #include "usb_defs.h"
+#include "configs.h"
 
-#pragma config PLLDIV = 1
-#pragma config CPUDIV = OSC1_PLL2
-#pragma config USBDIV = 2
-#pragma config FOSC = XTPLL_XT
-#pragma config FCMEM = OFF
-#pragma config IESO = OFF
-#pragma config PWRT = OFF
-#pragma config BOR = ON
-#pragma config BORV = 3
-#pragma config VREGEN = ON
-#pragma config WDT = OFF
-#pragma config WDTPS = 32768
-#pragma config MCLRE = ON
-#pragma config LPT1OSC = OFF
-#pragma config PBADEN = OFF
-#pragma config CCP2MX = ON
-#pragma config STVREN = ON
-#pragma config LVP = OFF
-//#pragma config ICPRT = OFF
-#pragma config XINST = OFF
-#pragma config DEBUG = OFF
-#pragma config CP0 = OFF
-#pragma config CP1 = OFF
-#pragma config CP2 = OFF
-//#pragma config CP3 = OFF
-#pragma config CPB = OFF
-#pragma config CPD = OFF
-#pragma config WRT0 = OFF
-#pragma config WRT1 = OFF
-#pragma config WRT2 = OFF
-//#pragma config WRT3 = OFF
-#pragma config WRTB = OFF
-#pragma config WRTC = OFF
-#pragma config WRTD = OFF
-#pragma config EBTR0 = OFF
-#pragma config EBTR1 = OFF
-#pragma config EBTR2 = OFF
-//#pragma config EBTR3 = OFF
-#pragma config EBTRB = OFF
-
-#define UPDATE			0x01
-#define SET_DIGOUT		0x02
+#define UPDATE			1
+#define SET_DIGOUT		2
+#define GET_DAC_VALS	3
+#define SET_DAC_VALS	4
+#define GET_VADC_VALS	5
+#define SET_VADC_VALS	6
+#define GET_IADC_VALS	7
+#define SET_IADC_VALS	8
+#define GET_RES_VAL		9
+#define SET_RES_VAL		10
+#define GET_NAME		11
+#define SET_NAME		12
 
 #pragma udata
 BUFDESC USB_buffer_desc;
@@ -69,8 +40,8 @@ unsigned char TMR3UH;
 rom const unsigned char Device[] = {
 	0x12,	// bLength
 	DEVICE,	// bDescriptorType
-	0x10,	// bcdUSB (low byte)
-	0x01,	// bcdUSB (high byte)
+	0x00,	// bcdUSB (low byte)
+	0x02,	// bcdUSB (high byte)
 	0x00,	// bDeviceClass
 	0x00,	// bDeviceSubClass
 	0x00,	// bDeviceProtocol
@@ -549,14 +520,14 @@ void ClassRequests(void) {
 }
 
 void VendorRequests(void) {
-	unsigned char temp;
+	unsigned char i, temp;
 
 	switch (USB_buffer_data[bRequest]) {
 		case UPDATE:
 			DACAL = USB_buffer_data[wValue];
 			DACAH = USB_buffer_data[wValueHigh];
-		//	DACBL = USB_buffer_data[wIndex];
-		//	DACBH = USB_buffer_data[wIndexHigh];
+			DACBL = USB_buffer_data[wIndex];
+			DACBH = USB_buffer_data[wIndexHigh];
 
 			ADCON0 = 0x03;					// select AN0 and set GO_DONE bit to start A/D conversion
 			while (ADCON0bits.GO_DONE);		// do nothing until the A/D conversion is complete
@@ -601,14 +572,14 @@ void VendorRequests(void) {
 			temp = SSPBUF;					// read received data in SPI buffer and throw it away
 			PORTBbits.RB2 = 1;				// set DAC _CS high
 
-		//	PORTBbits.RB2 = 0;				// set DAC _CS low
-		//	SSPBUF = (DACBH&0x0F)|0xB0;		// write DACBH to DACB, unbuffered Vref, output gain = 1, and enable output buffer via SPI
-		//	while (!SSPSTATbits.BF);		// do nothing until the transmission is complete
-		//	temp = SSPBUF;					// read received data in SPI buffer and throw it away
-		//	SSPBUF = DACBL;					// write DACBL to DACB via SPI
-		//	while (!SSPSTATbits.BF);		// do nothing until the transmission is complete
-		//	temp = SSPBUF;					// read received data in SPI buffer and throw it away
-		//	PORTBbits.RB2 = 1;				// set DAC _CS high
+			PORTBbits.RB2 = 0;				// set DAC _CS low
+			SSPBUF = (DACBH&0x0F)|0xB0;		// write DACBH to DACB, unbuffered Vref, output gain = 1, and enable output buffer via SPI
+			while (!SSPSTATbits.BF);		// do nothing until the transmission is complete
+			temp = SSPBUF;					// read received data in SPI buffer and throw it away
+			SSPBUF = DACBL;					// write DACBL to DACB via SPI
+			while (!SSPSTATbits.BF);		// do nothing until the transmission is complete
+			temp = SSPBUF;					// read received data in SPI buffer and throw it away
+			PORTBbits.RB2 = 1;				// set DAC _CS high
 
 			PORTBbits.RB3 = 0;				// set _LDAC low
 			PORTBbits.RB3 = 0;				// set _LDAC low
@@ -620,6 +591,205 @@ void VendorRequests(void) {
 			PORTB = (PORTB&0x0F)|(USB_buffer_data[wValue]<<4);
 			BD0I.bytecount = 0x00;			// set EP0 IN byte count to 0
 			BD0I.status = 0xC8;				// send packet as DATA1, set UOWN bit
+			break;
+		case GET_DAC_VALS:
+			EECON1bits.EEPGD = 0;
+			EECON1bits.CFGS = 0;
+			for (i = 0; i<4; i++) {
+				EEADR = i;
+				EECON1bits.RD = 1;
+				BD0I.address[i] = EEDATA;
+			}
+			BD0I.bytecount = 0x04;
+			BD0I.status = 0xC8;
+			break;
+		case SET_DAC_VALS:
+			INTCONbits.GIE = 0;
+			EECON1 = 0x04;
+			EEADR = 0;
+			EEDATA = USB_buffer_data[wValue];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wValueHigh];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wIndex];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wIndexHigh];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EECON1 = 0x00;
+			INTCONbits.GIE = 1;
+			BD0I.bytecount = 0x00;
+			BD0I.status = 0xC8;
+			break;
+		case GET_VADC_VALS:
+			EECON1bits.EEPGD = 0;
+			EECON1bits.CFGS = 0;
+			EEADR = 0x04;
+			for (i = 0; i<4; i++) {
+				EECON1bits.RD = 1;
+				BD0I.address[i] = EEDATA;
+				EEADR++;
+			}
+			BD0I.bytecount = 0x04;
+			BD0I.status = 0xC8;
+			break;
+		case SET_VADC_VALS:
+			INTCONbits.GIE = 0;
+			EECON1 = 0x04;
+			EEADR = 0x04;
+			EEDATA = USB_buffer_data[wValue];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wValueHigh];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wIndex];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wIndexHigh];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EECON1 = 0x00;
+			INTCONbits.GIE = 1;
+			BD0I.bytecount = 0x00;
+			BD0I.status = 0xC8;
+			break;
+		case GET_IADC_VALS:
+			EECON1bits.EEPGD = 0;
+			EECON1bits.CFGS = 0;
+			EEADR = 0x08;
+			for (i = 0; i<4; i++) {
+				EECON1bits.RD = 1;
+				BD0I.address[i] = EEDATA;
+				EEADR++;
+			}
+			BD0I.bytecount = 0x04;
+			BD0I.status = 0xC8;
+			break;
+		case SET_IADC_VALS:
+			INTCONbits.GIE = 0;
+			EECON1 = 0x04;
+			EEADR = 0x08;
+			EEDATA = USB_buffer_data[wValue];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wValueHigh];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wIndex];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wIndexHigh];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EECON1 = 0x00;
+			INTCONbits.GIE = 1;
+			BD0I.bytecount = 0x00;
+			BD0I.status = 0xC8;
+			break;
+		case GET_RES_VAL:
+			EECON1bits.EEPGD = 0;
+			EECON1bits.CFGS = 0;
+			EEADR = 0x0C;
+			EECON1bits.RD = 1;
+			BD0I.address[0] = EEDATA;
+			EEADR++;
+			EECON1bits.RD = 1;
+			BD0I.address[1] = EEDATA;
+			BD0I.bytecount = 0x02;
+			BD0I.status = 0xC8;
+			break;
+		case SET_RES_VAL:
+			INTCONbits.GIE = 0;
+			EECON1 = 0x04;
+			EEADR = 0x0C;
+			EEDATA = USB_buffer_data[wValue];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EEADR++;
+			EEDATA = USB_buffer_data[wValueHigh];
+			EECON2 = 0x55;
+			EECON2 = 0xAA;
+			EECON1bits.WR = 1;
+			while (!PIR2bits.EEIF) {}
+			PIR2bits.EEIF = 0;
+			EECON1 = 0x00;
+			INTCONbits.GIE = 1;
+			BD0I.bytecount = 0x00;
+			BD0I.status = 0xC8;
+			break;
+		case GET_NAME:
+			EECON1bits.EEPGD = 0;
+			EECON1bits.CFGS = 0;
+			EEADR = 0x0E;
+			EECON1bits.RD = 1;
+			temp = EEDATA;
+			if (temp>64)
+				temp = 0;
+			if (USB_buffer_data[wLength]<temp)
+				temp = USB_buffer_data[wLength];
+			for (i = 0; i<temp; i++) {
+				EEADR++;
+				EECON1bits.RD = 1;
+				BD0I.address[i] = EEDATA;
+			}
+			BD0I.bytecount = temp;
+			BD0I.status = 0xC8;
+			break;
+		case SET_NAME:
+			USB_dev_req = SET_NAME;
+			USB_packet_length = USB_buffer_data[wLength];
 			break;
 		default:
 			USB_error_flags |= 0x01;		// set Request Error Flag
@@ -660,8 +830,33 @@ void ProcessInToken(void) {
 }
 
 void ProcessOutToken(void) {
+	unsigned char i;
+
 	switch (USB_USTAT&0x18) {	// extract the EP bits
 		case EP0:
+			if (USB_dev_req==SET_NAME) {
+				USB_dev_req = NO_REQUEST;
+				INTCONbits.GIE = 0;
+				EECON1 = 0x04;
+				EEADR = 0x0E;
+				EEDATA = USB_packet_length;
+				EECON2 = 0x55;
+				EECON2 = 0xAA;
+				EECON1bits.WR = 1;
+				while (!PIR2bits.EEIF) {}
+				PIR2bits.EEIF = 0;
+				for (i = 0; i<USB_packet_length; i++) {
+					EEADR++;
+					EEDATA = BD0O.address[i];
+					EECON2 = 0x55;
+					EECON2 = 0xAA;
+					EECON1bits.WR = 1;
+					while (!PIR2bits.EEIF) {}
+					PIR2bits.EEIF = 0;
+				}
+				EECON1 = 0x00;
+				INTCONbits.GIE = 1;
+			}					
 			BD0O.bytecount = MAX_PACKET_SIZE;
 			BD0O.status = 0x88;
 			BD0I.bytecount = 0x00;	// set EP0 IN byte count to 0
