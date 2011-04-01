@@ -54,7 +54,7 @@ class smu:
 		VALUE = self.sign( RES_VAL[0] | ( RES_VAL[1] << 8 ) )
 		self.RES = 51*VALUE/16384.0
 		#add safety feature
-		atexit.register(self.set(amps = 0))
+		atexit.register(self.set, amps = 0)
 
 	def update(self, mod = 1):
 		"""updates smu target V/I, returns actual V/I"""
