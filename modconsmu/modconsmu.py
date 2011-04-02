@@ -72,7 +72,7 @@ class smu:
 		data = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.vReqs['UPDATE'], wValue = value, wIndex = 0, data_or_wLength = 12)
 		retVolt = ((data[0]|data[1]<<8)-self.VADC)/self.VADCGAIN
 		retAmp = ((data[4]|data[5]<<8)-self.IADC)/(self.IADCGAIN*self.RES)
-		modVolt = (data[6]|data[7]<<8)*(5.00/1023)
+		modVolt = (data[6]|data[7]<<8)*(4.096/1023)
 		if mod:
 			return (retVolt, retAmp, modVolt)
 		else:
