@@ -3,3 +3,7 @@ README file for the SMU used in Olin's "Introduction to Modeling and Control" co
 Fun plots can be found at http://min.us/mvfQleq.
 
 Fun uses can be found at ../apps
+
+##Notes
+
+* airwire from RA3/AN3 goes to the DAC's Latch
