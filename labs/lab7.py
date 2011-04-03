@@ -15,44 +15,45 @@ def log(data):
 #s11 - Vout1
 #s12 - V
 
-smu1.set_voltage(1, 5)
+smu1.set_voltage(1, 0)
 smu1.set_current(2, 0)
 
-for v in linspace(2.5, 3.5, 5):
+#VbBelowThresh = .656
+
+for v in linspace(1.5, 2.5, 3):
 	smu0.set_voltage(1, v)
-	for v in linspace(2.5, 3.5, 500):
+	for v in linspace(1.5, 2.5, 300):
 		smu0.set_voltage(2, v)
 		log(VbBelowThresh)
 
-sio.savemat("stuff.mat", mdict={'VbBelowThresh': VbBelowThresh})
-
-for v in linspace(2.5, 3.5, 5):
-	smu0.set_voltage(1, v)
-	for v in linspace(2.5, 3.5, 500):
-		smu0.set_voltage(2, v)
-		log(VbAboveThresh)
-
-sio.savemat("stuff1.mat", mdict={'VbAboveThresh': VbAboveThresh})
-
+sio.savemat("stuff0.mat", mdict={'VbBelowThresh': VbBelowThresh})
 
 #move s11 from Vout1 to Vout2
-VbBelowThresh = []
-VbAboveThresh = []
 
-for v in linspace(2.5, 3.5, 5):
+for v in linspace(1.5, 2.5, 3):
     smu0.set_voltage(1, v)
-    for v in linspace(2.5, 3.5, 500):
+    for v in linspace(1.5, 2.5, 300):
+        smu0.set_voltage(2, v)
+        log(VbBelowThresh)
+
+sio.savemat("stuff2.mat", mdict={'VbBelowThresh': VbBelowThresh})
+
+#VbAboveThresh = 0.834
+
+for v in linspace(1.5, 2.5, 3):
+    smu0.set_voltage(1, v)
+    for v in linspace(1.5, 2.5, 300):
         smu0.set_voltage(2, v)
         log(VbAboveThresh)
 
-sio.savemat("stuff2.mat", mdict={'VbAboveThresh': VbAboveThresh})
+sio.savemat("stuff3.mat", mdict={'VbAboveThresh': VbAboveThresh})
 
-for v in linspace(2.5, 3.5, 5):
+#move s11 from Vout2 to Vout1
+
+for v in linspace(1.5, 2.5, 3):
     smu0.set_voltage(1, v)
-    for v in linspace(2.5, 3.5, 500):
+    for v in linspace(1.5, 2.5, 300):
         smu0.set_voltage(2, v)
         log(VbAboveThresh)
 
-sio.savemat("stuff3.mat", mdict={'VbBelowThresh': VbAboveThresh})
-
-
+sio.savemat("stuff1.mat", mdict={'VbAboveThresh': VbAboveThresh})
