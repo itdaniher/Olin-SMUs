@@ -1,59 +1,61 @@
+from numpy import linspace
 import circuitsmu
-from pylab import *
+from scipy import io as sio
 
-VbBelowThresh = []
-VbAboveThresh = []
-
-smu0 = circuitsmu.smu(0)
-smu1 = circuitsmu.smu(1)
-
-def log(data):
-	data.append((smu0.get_voltage(1), smu0.get_current(1), smu0.get_voltage(2), smu0.get_current(2), smu1.get_voltage(1), smu1.get_current(1), smu1.get_voltage(2), smu1.get_current(2)))
 
 #s01 - V1
 #s02 - V2
 #s11 - Vout1
 #s12 - V
 
-smu1.set_voltage(1, 0)
+smu0 = circuitsmu.smu(0)
+smu1 = circuitsmu.smu(1)
+
+def getState():
+	return (smu0.get_voltage(1), smu0.get_current(1), smu0.get_voltage(2), smu0.get_current(2), smu1.get_voltage(1), smu1.get_current(1), smu1.get_voltage(2), smu1.get_current(2))
+
+smu1.set_voltage(1, 5)
 smu1.set_current(2, 0)
+#Vb = 0.673
 
-#VbBelowThresh = .656
+VbBelowThresh = [[], [], []]
 
-for v in linspace(1.5, 2.5, 3):
-	smu0.set_voltage(1, v)
-	for v in linspace(1.5, 2.5, 300):
-		smu0.set_voltage(2, v)
-		log(VbBelowThresh)
+numV2s = 3
+numV1s = 300
 
-sio.savemat("stuff0.mat", mdict={'VbBelowThresh': VbBelowThresh})
+V2s = linspace(2.5, 3.5, numV2s).tolist()
+V1s = linspace(2.0, 4, numV1s).tolist()
 
-#move s11 from Vout1 to Vout2
+for V2 in V2s:
+	smu0.set_voltage(1, V2)
+	for V1 in V1s:
+		smu0.set_voltage(2, V1)
+		VbBelowThresh[V2s.index(V2)].append(getState())
 
-for v in linspace(1.5, 2.5, 3):
-    smu0.set_voltage(1, v)
-    for v in linspace(1.5, 2.5, 300):
-        smu0.set_voltage(2, v)
-        log(VbBelowThresh)
+sio.savemat("nFET-VbBelowThresh-Vout1.mat", mdict={'VbBelowThresh': VbBelowThresh})
 
-sio.savemat("stuff2.mat", mdict={'VbBelowThresh': VbBelowThresh})
+#s11 - Vout2
 
-#VbAboveThresh = 0.834
+VbBelowThresh = [[], [], []]
 
-for v in linspace(1.5, 2.5, 3):
-    smu0.set_voltage(1, v)
-    for v in linspace(1.5, 2.5, 300):
-        smu0.set_voltage(2, v)
-        log(VbAboveThresh)
+for V2 in V2s:
+	smu0.set_voltage(1, V2)
+	for V1 in V1s:
+		smu0.set_voltage(2, V1)
+		VbBelowThresh[V2s.index(V2)].append(getState())
 
-sio.savemat("stuff3.mat", mdict={'VbAboveThresh': VbAboveThresh})
+sio.savemat("nFET-VbBelowThresh-Vout2.mat", mdict={'VbBelowThresh': VbBelowThresh})
 
-#move s11 from Vout2 to Vout1
+#Vb = 0.803
+#s11 - Vout1
+VbAboveThresh = [[], [], []]
 
-for v in linspace(1.5, 2.5, 3):
-    smu0.set_voltage(1, v)
-    for v in linspace(1.5, 2.5, 300):
-        smu0.set_voltage(2, v)
-        log(VbAboveThresh)
+for V2 in V2s:
+    smu0.set_voltage(1, V2)
+    for V1 in V1s:
+        smu0.set_voltage(2, V1)
+        VbAboveThresh[V2s.index(V2)].append(getState())
 
-sio.savemat("stuff1.mat", mdict={'VbAboveThresh': VbAboveThresh})
+sio.savemat("nFET-VbAboveThresh-Vout1.mat", mdict={'VbAboveThresh': VbAboveThresh})
+
+
