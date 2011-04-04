@@ -58,4 +58,13 @@ for V2 in V2s:
 
 sio.savemat("nFET-VbAboveThresh-Vout1.mat", mdict={'VbAboveThresh': VbAboveThresh})
 
+#s11 - Vout2
+VbAboveThresh = [[], [], []]
 
+for V2 in V2s:
+    smu0.set_voltage(1, V2)
+    for V1 in V1s:
+        smu0.set_voltage(2, V1)
+        VbAboveThresh[V2s.index(V2)].append(getState())
+
+sio.savemat("nFET-VbAboveThresh-Vout2.mat", mdict={'VbAboveThresh': VbAboveThresh})
