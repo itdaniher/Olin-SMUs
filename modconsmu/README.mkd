@@ -7,3 +7,4 @@ Fun uses can be found at ../apps
 ##Notes
 
 * airwire from RA3/AN3 goes to the DAC's Latch
+* airewire from V_ref goes to the DAC's 4.096v reference 
