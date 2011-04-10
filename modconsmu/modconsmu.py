@@ -25,7 +25,8 @@ class smu:
 	def __init__(self):
 		"""Find a USB device with the VID and PID of the ModCon SMU."""
 		#define variables
-		self.zero = 0x07CF
+		self.zeroV = 0x07CF
+		self.zeroI = 0x07CF
 		self.maxV = 9.93
 		self.minV = -10.45
 		self.scaleFactorV = (self.maxV-self.minV)/(2**12)
@@ -59,10 +60,10 @@ class smu:
 	def update(self, mod = 1):
 		"""updates smu target V/I, returns actual V/I"""
 		if self.driving == 'v':
-			value = int(self.zero - self.v/self.scaleFactorV)
+			value = int(self.zeroV - self.v/self.scaleFactorV)
 			direction = 0
 		elif self.driving == 'i':
-			value = int(self.zero + self.i * 10000)
+			value = int(self.zeroI + self.i * 10000)
 			direction = 1
 		else:
 			print("bad type")
