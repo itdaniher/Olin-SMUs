@@ -1,5 +1,4 @@
 #warning. there is a bug somewhere in this code. I do not know where it is.
-import ctypes
 import usb
 import atexit
 
@@ -12,7 +11,7 @@ class smu():
 		atexit.register(self.zero)
 		self.dev = usb.core.find(idVendor=0x6666, idProduct=0xABCD)   
 		#self.dev.control_transfer(0x00, 0x09, 1, 0, 0, buffer)
-		buffer = self.dev.ctrl_transfer(bmRequestType = 0x00, bRequest = 0x00, wValue = 1, wIndex = 0, data_or_wLength = 64) 
+		#buffer = self.dev.ctrl_transfer(bmRequestType = 0x00, bRequest = 0x00, wValue = 1, wIndex = 0, data_or_wLength = 64) 
 		self.SET_FN = 0
 		self.GET_FN = 1
 		self.SET_AUTORANGE = 2
@@ -77,11 +76,11 @@ class smu():
 			self.set_autorange(ch, self.OFF)
 			done = 0
 			while not done:
-				buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_MEAS_KILL60Hz, wValue = 0, wIndex = ch, data_or_wLength = 6) 
+				buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_MEAS_KILL60HZ, wValue = 0, wIndex = ch, data_or_wLength = 6) 
 				#ret = usb.control_transfer(self.dev, 0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6, buffer)
-				res = abs(((buffer[1])<<8)|buffer[0]))-((buffer[3])<<8)|buffer[2])))
-				range = buffer[4])
-				fn = buffer[5])
+				res = abs(((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2]))
+				range = buffer[4]
+				fn = buffer[5]
 				if fn==self.SRCV_MEASI:
 					if (res>2000) and (range!=self._20MA):
 						range = range-1
@@ -100,7 +99,7 @@ class smu():
 					else:
 						done = 1
 					self.set_vrange(ch, range)
-		else
+		else:
 			print "Illegal channel specified.\n"
 
 	def close(self):
@@ -119,7 +118,7 @@ class smu():
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_AUTORANGE, wValue = 0, wIndex = ch, data_or_wLength = 1) 
 			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_AUTORANGE, 0, ch, 1, buffer)
-			return buffer[0])
+			return buffer[0]
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -155,7 +154,7 @@ class smu():
 		if buffer[5]==self.SRCV_MEASI:
 			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
 			value = self.get_src_vmult[buffer[4]]*value
-			ret.append(self.get_disp_srcv_fmt[buffer[4])] % value)
+			ret.append(self.get_disp_srcv_fmt[buffer[4]] % value)
 			value = ((buffer[7]<<8)|buffer[6])-((buffer[9]<<8)|buffer[8])
 			value = self.get_meas_imult[buffer[10]]*value
 			ret.append(self.get_disp_measi_fmt[buffer[10]] % (self.get_disp_imult[buffer[10]]*value))
@@ -221,7 +220,7 @@ class smu():
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_IRANGE, wValue = 0, wIndex = ch, data_or_wLength = 1) 
 			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_IRANGE, 0, ch, 1, buffer)
-			return buffer[0])
+			return buffer[0]
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -333,7 +332,7 @@ class smu():
 			if (arange<0) or (arange>1):
 				print "Illegal autorange setting specified.\n"
 			else:
-				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_AUTORANGE, wValue = arange, wIndex = ch, data_or_wLength = 0) 
+				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_AUTORANGE, wValue = arange, wIndex = ch)#, data_or_wLength = 0) 
 				#ret = usb.control_transfer(self.dev, 0x40, self.SET_AUTORANGE, arange, ch, 0, buffer)
 		else:
 			print "Illegal channel number specified.\n"
@@ -433,7 +432,7 @@ class smu():
 						temp = (value<<3)|range
 					else:
 						temp = 0x8000|((-value)<<3)|range
-					self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_SRC, wValue = temp, wIndex = (units<<8)|ch, data_or_wLength = 0) 
+					self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_SRC, wValue = temp, wIndex = (units<<8)|ch)#, data_or_wLength = 0) 
 					#ret = usb.control_transfer(self.dev, 0x40, self.SET_SRC, temp, (units<<8)|ch, 0, buffer)
 		else:
 			print "Illegal channel number specified.\n"
@@ -499,7 +498,7 @@ class smu():
 			if (vrange<0) or (vrange>3):
 				print "Illegal voltage range setting specified.\n"
 			else:
-				ret = self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_VRANGE, wValue = vrange, wIndex = ch, data_or_wLength = 0) 
+				ret = self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_VRANGE, wValue = vrange, wIndex = ch)#, data_or_wLength = 0) 
 				#ret = usb.control_transfer(self.dev, 0x40, self.SET_VRANGE, vrange, ch, 0, buffer)
 				if ret<0:
 					print "Unable to send SET_VRANGE vendor request.\n"
@@ -509,3 +508,6 @@ class smu():
 	def zero(self):
 		self.set_current(1, 0)
 		self.set_current(2, 0)
+
+if __name__ == "__main__":
+	smu = smu()
