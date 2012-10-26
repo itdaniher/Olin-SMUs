@@ -379,10 +379,8 @@ class smu():
 			if (irange<0) or (irange>6):
 				print "Illegal current range setting specified.\n"
 			else:
-				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_IRANGE, wValue = irange, wIndex = ch, data_or_wLength = 0) 
+				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_IRANGE, wValue = irange, wIndex = ch)#, data_or_wLength = 0) 
 				#ret = usb.control_transfer(self.dev, 0x40, self.SET_IRANGE, irange, ch, 0, buffer)
-				if ret<0:
-					print "Unable to send SET_IRANGE vendor request.\n"
 		else:
 			print "Illegal channel number specified.\n"
 
