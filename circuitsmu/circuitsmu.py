@@ -1,20 +1,18 @@
 #warning. there is a bug somewhere in this code. I do not know where it is.
 import ctypes
+import usb
 import atexit
 
-usb = ctypes.cdll.LoadLibrary("./circuitsmu/_smu.so")
-usb.initialize()
-
-buffer = ctypes.c_buffer(64)
+buffer = []
 
 class smu():
-	def __init__(self, num = 0):
+	def __init__(self):
 		"""pass smu class instantiation the number of the SMU you want to hook to - multiSMU support hack."""
 		#experimental SMU-zeroing-on-close hook
 		atexit.register(self.zero)
-		#open device from the libusb / ctypes disaster
-		self.dev = usb.open_device(0x6666, 0xABCD, num)
-		usb.control_transfer(self.dev, 0x00, 0x09, 1, 0, 0, buffer)
+		self.dev = usb.core.find(idVendor=0x6666, idProduct=0xABCD)   
+		#self.dev.control_transfer(0x00, 0x09, 1, 0, 0, buffer)
+		buffer = self.dev.ctrl_transfer(bmRequestType = 0x00, bRequest = 0x00, wValue = 1, wIndex = 0, data_or_wLength = 64) 
 		self.SET_FN = 0
 		self.GET_FN = 1
 		self.SET_AUTORANGE = 2
@@ -79,33 +77,30 @@ class smu():
 			self.set_autorange(ch, self.OFF)
 			done = 0
 			while not done:
-				ret = usb.control_transfer(self.dev, 0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6, buffer)
-				if ret<0:
-					print "Unable to send GET_MEAS_KILL60HZ vendor request.\n"
-					done = 1
-				else:
-					res = abs(((ord(buffer.raw[1])<<8)|ord(buffer.raw[0]))-((ord(buffer.raw[3])<<8)|ord(buffer.raw[2])))
-					range = ord(buffer.raw[4])
-					fn = ord(buffer.raw[5])
-					if fn==self.SRCV_MEASI:
-						if (res>2000) and (range!=self._20MA):
-							range = range-1
-						elif (res<100) and (range!=self._200NA):
-							range = range+1
-						else:
-							done = 1
-						self.set_irange(ch, range)
+				buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_MEAS_KILL60Hz, wValue = 0, wIndex = ch, data_or_wLength = 6) 
+				#ret = usb.control_transfer(self.dev, 0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6, buffer)
+				res = abs(((buffer[1])<<8)|buffer[0]))-((buffer[3])<<8)|buffer[2])))
+				range = buffer[4])
+				fn = buffer[5])
+				if fn==self.SRCV_MEASI:
+					if (res>2000) and (range!=self._20MA):
+						range = range-1
+					elif (res<100) and (range!=self._200NA):
+						range = range+1
 					else:
-						if (res>2000) and (range!=self._10V):
-							range = range-1
-						elif (res<640) and (range==self._10V):
-							range = range+1
-						elif (res<800) and (range==self._4V):
-							range = range+1
-						else:
-							done = 1
-						self.set_vrange(ch, range)
-		else:
+						done = 1
+					self.set_irange(ch, range)
+				else:
+					if (res>2000) and (range!=self._10V):
+						range = range-1
+					elif (res<640) and (range==self._10V):
+						range = range+1
+					elif (res<800) and (range==self._4V):
+						range = range+1
+					else:
+						done = 1
+					self.set_vrange(ch, range)
+		else
 			print "Illegal channel specified.\n"
 
 	def close(self):
@@ -122,11 +117,9 @@ class smu():
 		   chanel CH otherwise it returns 0.  Here CH can be 1 or 2.
 		"""
 		if (ch==1) or (ch==2):
-			ret = usb.control_transfer(self.dev, 0xC0, self.GET_AUTORANGE, 0, ch, 1, buffer)
-			if ret<0:
-				print "Unable to send GET_AUTORANGE vendor request.\n"
-			else:
-				return ord(buffer.raw[0])
+			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_AUTORANGE, wValue = 0, wIndex = ch, data_or_wLength = 1) 
+			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_AUTORANGE, 0, ch, 1, buffer)
+			return buffer[0])
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -156,48 +149,46 @@ class smu():
 		   GET_DISPLAY is support function for UPDATE_DISPLAY.  You will 
 		   probably not want to call it directly in your own scripts.
 		"""
-		ret = usb.control_transfer(self.dev, 0xC0, self.GET_DISPLAY, 0, 1, 24, buffer)
-		if ret<0:
-			print "Unable to send GET_DISPLAY vendor request.\n"
+		buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_DISPLAY, wValue = 0, wIndex = 1, data_or_wLength = 24) 
+		#ret = usb.control_transfer(self.dev, 0xC0, self.GET_DISPLAY, 0, 1, 24, buffer)
+		ret = []
+		if buffer[5]==self.SRCV_MEASI:
+			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
+			value = self.get_src_vmult[buffer[4]]*value
+			ret.append(self.get_disp_srcv_fmt[buffer[4])] % value)
+			value = ((buffer[7]<<8)|buffer[6])-((buffer[9]<<8)|buffer[8])
+			value = self.get_meas_imult[buffer[10]]*value
+			ret.append(self.get_disp_measi_fmt[buffer[10]] % (self.get_disp_imult[buffer[10]]*value))
 		else:
-			ret = []
-			if ord(buffer.raw[5])==self.SRCV_MEASI:
-				value = ((ord(buffer.raw[1])<<8)|ord(buffer.raw[0]))-((ord(buffer.raw[3])<<8)|ord(buffer.raw[2]))
-				value = self.get_src_vmult[ord(buffer.raw[4])]*value
-				ret.append(self.get_disp_srcv_fmt[ord(buffer.raw[4])] % value)
-				value = ((ord(buffer.raw[7])<<8)|ord(buffer.raw[6]))-((ord(buffer.raw[9])<<8)|ord(buffer.raw[8]))
-				value = self.get_meas_imult[ord(buffer.raw[10])]*value
-				ret.append(self.get_disp_measi_fmt[ord(buffer.raw[10])] % (self.get_disp_imult[ord(buffer.raw[10])]*value))
-			else:
-				value = ((ord(buffer.raw[1])<<8)|ord(buffer.raw[0]))-((ord(buffer.raw[3])<<8)|ord(buffer.raw[2]))
-				value = self.get_src_imult[ord(buffer.raw[4])]*value
-				ret.append(self.get_disp_srci_fmt[ord(buffer.raw[4])] % (self.get_disp_imult[ord(buffer.raw[4])]*value))
-				value = ((ord(buffer.raw[7])<<8)|ord(buffer.raw[6]))-((ord(buffer.raw[9])<<8)|ord(buffer.raw[8]))
-				value = self.get_meas_vmult[ord(buffer.raw[10])]*value
-				ret.append(self.get_disp_measv_fmt[ord(buffer.raw[10])] % value)
-			if ord(buffer.raw[11])==self.ON:
-				ret.append(u'AUTO')
-			else:
-				ret.append(u'	')
-			if ord(buffer.raw[17])==self.SRCV_MEASI:
-				value = ((ord(buffer.raw[13])<<8)|ord(buffer.raw[12]))-((ord(buffer.raw[15])<<8)|ord(buffer.raw[14]))
-				value = self.get_src_vmult[ord(buffer.raw[16])]*value
-				ret.append(self.get_disp_srcv_fmt[ord(buffer.raw[16])] % value)
-				value = ((ord(buffer.raw[19])<<8)|ord(buffer.raw[18]))-((ord(buffer.raw[21])<<8)|ord(buffer.raw[20]))
-				value = self.get_meas_imult[ord(buffer.raw[22])]*value
-				ret.append(self.get_disp_measi_fmt[ord(buffer.raw[22])] % (self.get_disp_imult[ord(buffer.raw[22])]*value))
-			else:
-				value = ((ord(buffer.raw[13])<<8)|ord(buffer.raw[12]))-((ord(buffer.raw[15])<<8)|ord(buffer.raw[14]))
-				value = self.get_src_imult[ord(buffer.raw[16])]*value
-				ret.append(self.get_disp_srci_fmt[ord(buffer.raw[16])] % (self.get_disp_imult[ord(buffer.raw[16])]*value))
-				value = ((ord(buffer.raw[19])<<8)|ord(buffer.raw[18]))-((ord(buffer.raw[21])<<8)|ord(buffer.raw[20]))
-				value = self.get_meas_vmult[ord(buffer.raw[22])]*value
-				ret.append(self.get_disp_measv_fmt[ord(buffer.raw[22])] % value)
-			if ord(buffer.raw[23])==self.ON:
-				ret.append(u'AUTO')
-			else:
-				ret.append(u'	')
-			return ret
+			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
+			value = self.get_src_imult[buffer[4]]*value
+			ret.append(self.get_disp_srci_fmt[buffer[4]] % (self.get_disp_imult[buffer[4]]*value))
+			value = ((buffer[7]<<8)|buffer[6])-((buffer[9]<<8)|buffer[8])
+			value = self.get_meas_vmult[buffer[10]]*value
+			ret.append(self.get_disp_measv_fmt[buffer[10]] % value)
+		if buffer[11]==self.ON:
+			ret.append(u'AUTO')
+		else:
+			ret.append(u'	')
+		if buffer[17]==self.SRCV_MEASI:
+			value = ((buffer[13]<<8)|buffer[12])-((buffer[15]<<8)|buffer[14])
+			value = self.get_src_vmult[buffer[16]]*value
+			ret.append(self.get_disp_srcv_fmt[buffer[16]] % value)
+			value = ((buffer[19]<<8)|buffer[18])-((buffer[21]<<8)|buffer[20])
+			value = self.get_meas_imult[buffer[22]]*value
+			ret.append(self.get_disp_measi_fmt[buffer[22]] % (self.get_disp_imult[buffer[22]]*value))
+		else:
+			value = ((buffer[13]<<8)|buffer[12])-((buffer[15]<<8)|buffer[14])
+			value = self.get_src_imult[buffer[16]]*value
+			ret.append(self.get_disp_srci_fmt[buffer[16]] % (self.get_disp_imult[buffer[16]]*value))
+			value = ((buffer[19]<<8)|buffer[18])-((buffer[21]<<8)|buffer[20])
+			value = self.get_meas_vmult[buffer[22]]*value
+			ret.append(self.get_disp_measv_fmt[buffer[22]] % value)
+		if buffer[23]==self.ON:
+			ret.append(u'AUTO')
+		else:
+			ret.append(u'	')
+		return ret
 
 	def get_function(self, ch):
 		"""
@@ -206,11 +197,9 @@ class smu():
 		   returns 0 if chanel CH is in SV/MI mode.  Here CH can be 1 or 2.
 		"""
 		if (ch==1) or (ch==2):
-			ret = usb.control_transfer(self.dev, 0xC0, self.GET_FN, 0, ch, 1, buffer)
-			if ret<0:
-				print "Unable to send GET_FN vendor request.\n"
-			else:
-				return ord(buffer.raw[0])
+			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_FN, wValue = 0, wIndex = ch, data_or_wLength = 1) 
+			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_FN, 0, ch, 1, buffer)
+			return buffer[0]
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -230,11 +219,9 @@ class smu():
 				5		 200 nA		  50 pA		   100 pA
 		"""
 		if (ch==1) or (ch==2):
-			ret = usb.control_transfer(self.dev, 0xC0, self.GET_IRANGE, 0, ch, 1, buffer)
-			if ret<0:
-				print "Unable to send GET_IRANGE vendor request.\n"
-			else:
-				return ord(buffer.raw[0])
+			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_IRANGE, wValue = 0, wIndex = ch, data_or_wLength = 1) 
+			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_IRANGE, 0, ch, 1, buffer)
+			return buffer[0])
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -252,21 +239,19 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			self.autorange(ch)
-			ret = usb.control_transfer(self.dev, 0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6, buffer)
-			if ret<0:
-				print "Unable to send GET_MEAS_KILL60HZ vendor request.\n"
+			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_MEAS_KILL60HZ, wValue = 0, wIndex = ch, data_or_wLength = 6) 
+			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6, buffer)
+			ret = []
+			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
+			if buffer[5]==self.SRCV_MEASI:
+				value = value*self.get_meas_imult[buffer[4]]
+				units = 1
 			else:
-				ret = []
-				value = ((ord(buffer.raw[1])<<8)|ord(buffer.raw[0]))-((ord(buffer.raw[3])<<8)|ord(buffer.raw[2]))
-				if ord(buffer.raw[5])==self.SRCV_MEASI:
-					value = value*self.get_meas_imult[ord(buffer.raw[4])]
-					units = 1
-				else:
-					value = value*self.get_meas_vmult[ord(buffer.raw[4])]
-					units = 0
-				ret.append(value)
-				ret.append(units)
-				return ret
+				value = value*self.get_meas_vmult[buffer[4]]
+				units = 0
+			ret.append(value)
+			ret.append(units)
+			return ret
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -283,19 +268,17 @@ class smu():
 		   SI/MV mode).
 		"""
 		if (ch==1) or (ch==2):
-			ret = usb.control_transfer(self.dev, 0xC0, self.GET_SRC, 0, ch, 6, buffer)
-			if ret<0:
-				print "Unable to send GET_SRC vendor request.\n"
+			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_SRC, wValue = 0, wIndex = ch, data_or_wLength = 6) 
+			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_SRC, 0, ch, 6, buffer)
+			ret = []
+			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
+			if buffer[5]==self.SRCV_MEASI:
+				value = value*self.get_src_vmult[buffer[4]]
 			else:
-				ret = []
-				value = ((ord(buffer.raw[1])<<8)|ord(buffer.raw[0]))-((ord(buffer.raw[3])<<8)|ord(buffer.raw[2]))
-				if ord(buffer.raw[5])==self.SRCV_MEASI:
-					value = value*self.get_src_vmult[ord(buffer.raw[4])]
-				else:
-					value = value*self.get_src_imult[ord(buffer.raw[4])]
-				ret.append(value)
-				ret.append(ord(buffer.raw[5]))
-				return ret
+				value = value*self.get_src_imult[buffer[4]]
+			ret.append(value)
+			ret.append(buffer[5])
+			return ret
 		else:
 			print "Illegal channel number specified.\n"
 		
@@ -332,11 +315,9 @@ class smu():
 				2		  2 V		   500 uV			1 mV
 		"""
 		if (ch==1) or (ch==2):
-			ret = usb.control_transfer(self.dev, 0xC0, self.GET_VRANGE, 0, ch, 1, buffer)
-			if ret<0:
-				print "Unable to send GET_VRANGE vendor request.\n"
-			else:
-				return ord(buffer.raw[0])
+			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_VRANGE, wValue = 0, wIndex = ch, data_or_wLength = 1) 
+			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_VRANGE, 0, ch, 1, buffer)
+			return buffer[0]
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -352,9 +333,8 @@ class smu():
 			if (arange<0) or (arange>1):
 				print "Illegal autorange setting specified.\n"
 			else:
-				ret = usb.control_transfer(self.dev, 0x40, self.SET_AUTORANGE, arange, ch, 0, buffer)
-				if ret<0:
-					print "Unable to send SET_AUTORANGE vendor request.\n"
+				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_AUTORANGE, wValue = arange, wIndex = ch, data_or_wLength = 0) 
+				#ret = usb.control_transfer(self.dev, 0x40, self.SET_AUTORANGE, arange, ch, 0, buffer)
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -376,9 +356,7 @@ class smu():
 			if (fn<0) or (fn>1):
 				print "Illegal function specified.\n"
 			else:
-				ret = usb.control_transfer(self.dev, 0x40, self.SET_FN, fn, ch, 0, buffer)
-				if ret<0:
-					print "Unable to send SET_FN vendor request.\n"
+				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_FN, wValue = fn, wIndex = ch, data_or_wLength = 0) 
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -402,7 +380,8 @@ class smu():
 			if (irange<0) or (irange>6):
 				print "Illegal current range setting specified.\n"
 			else:
-				ret = usb.control_transfer(self.dev, 0x40, self.SET_IRANGE, irange, ch, 0, buffer)
+				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_IRANGE, wValue = irange, wIndex = ch, data_or_wLength = 0) 
+				#ret = usb.control_transfer(self.dev, 0x40, self.SET_IRANGE, irange, ch, 0, buffer)
 				if ret<0:
 					print "Unable to send SET_IRANGE vendor request.\n"
 		else:
@@ -454,9 +433,8 @@ class smu():
 						temp = (value<<3)|range
 					else:
 						temp = 0x8000|((-value)<<3)|range
-					ret = usb.control_transfer(self.dev, 0x40, self.SET_SRC, temp, (units<<8)|ch, 0, buffer)
-					if ret<0:
-						print "Unable to send SET_SRC vendor request.\n"
+					self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_SRC, wValue = temp, wIndex = (units<<8)|ch, data_or_wLength = 0) 
+					#ret = usb.control_transfer(self.dev, 0x40, self.SET_SRC, temp, (units<<8)|ch, 0, buffer)
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -521,7 +499,8 @@ class smu():
 			if (vrange<0) or (vrange>3):
 				print "Illegal voltage range setting specified.\n"
 			else:
-				ret = usb.control_transfer(self.dev, 0x40, self.SET_VRANGE, vrange, ch, 0, buffer)
+				ret = self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_VRANGE, wValue = vrange, wIndex = ch, data_or_wLength = 0) 
+				#ret = usb.control_transfer(self.dev, 0x40, self.SET_VRANGE, vrange, ch, 0, buffer)
 				if ret<0:
 					print "Unable to send SET_VRANGE vendor request.\n"
 		else:
