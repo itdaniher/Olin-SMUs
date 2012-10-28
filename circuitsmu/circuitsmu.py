@@ -10,8 +10,6 @@ class smu():
 		#experimental SMU-zeroing-on-close hook
 		atexit.register(self.zero)
 		self.dev = usb.core.find(idVendor=0x6666, idProduct=0xABCD)   
-		#self.dev.control_transfer(0x00, 0x09, 1, 0, 0, buffer)
-		#buffer = self.dev.ctrl_transfer(bmRequestType = 0x00, bRequest = 0x00, wValue = 1, wIndex = 0, data_or_wLength = 64) 
 		self.SET_FN = 0
 		self.GET_FN = 1
 		self.SET_AUTORANGE = 2
@@ -117,7 +115,6 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_AUTORANGE, wValue = 0, wIndex = ch, data_or_wLength = 1) 
-			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_AUTORANGE, 0, ch, 1, buffer)
 			return buffer[0]
 		else:
 			print "Illegal channel number specified.\n"
@@ -149,7 +146,6 @@ class smu():
 		   probably not want to call it directly in your own scripts.
 		"""
 		buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_DISPLAY, wValue = 0, wIndex = 1, data_or_wLength = 24) 
-		#ret = usb.control_transfer(self.dev, 0xC0, self.GET_DISPLAY, 0, 1, 24, buffer)
 		ret = []
 		if buffer[5]==self.SRCV_MEASI:
 			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
@@ -197,7 +193,6 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_FN, wValue = 0, wIndex = ch, data_or_wLength = 1) 
-			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_FN, 0, ch, 1, buffer)
 			return buffer[0]
 		else:
 			print "Illegal channel number specified.\n"
@@ -219,7 +214,6 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_IRANGE, wValue = 0, wIndex = ch, data_or_wLength = 1) 
-			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_IRANGE, 0, ch, 1, buffer)
 			return buffer[0]
 		else:
 			print "Illegal channel number specified.\n"
@@ -239,7 +233,6 @@ class smu():
 		if (ch==1) or (ch==2):
 			self.autorange(ch)
 			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_MEAS_KILL60HZ, wValue = 0, wIndex = ch, data_or_wLength = 6) 
-			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_MEAS_KILL60HZ, 0, ch, 6, buffer)
 			ret = []
 			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
 			if buffer[5]==self.SRCV_MEASI:
@@ -268,7 +261,6 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_SRC, wValue = 0, wIndex = ch, data_or_wLength = 6) 
-			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_SRC, 0, ch, 6, buffer)
 			ret = []
 			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
 			if buffer[5]==self.SRCV_MEASI:
@@ -315,7 +307,6 @@ class smu():
 		"""
 		if (ch==1) or (ch==2):
 			buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_VRANGE, wValue = 0, wIndex = ch, data_or_wLength = 1) 
-			#ret = usb.control_transfer(self.dev, 0xC0, self.GET_VRANGE, 0, ch, 1, buffer)
 			return buffer[0]
 		else:
 			print "Illegal channel number specified.\n"
@@ -333,7 +324,6 @@ class smu():
 				print "Illegal autorange setting specified.\n"
 			else:
 				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_AUTORANGE, wValue = arange, wIndex = ch)#, data_or_wLength = 0) 
-				#ret = usb.control_transfer(self.dev, 0x40, self.SET_AUTORANGE, arange, ch, 0, buffer)
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -379,8 +369,7 @@ class smu():
 			if (irange<0) or (irange>6):
 				print "Illegal current range setting specified.\n"
 			else:
-				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_IRANGE, wValue = irange, wIndex = ch)#, data_or_wLength = 0) 
-				#ret = usb.control_transfer(self.dev, 0x40, self.SET_IRANGE, irange, ch, 0, buffer)
+				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_IRANGE, wValue = irange, wIndex = ch)
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -430,8 +419,7 @@ class smu():
 						temp = (value<<3)|range
 					else:
 						temp = 0x8000|((-value)<<3)|range
-					self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_SRC, wValue = temp, wIndex = (units<<8)|ch)#, data_or_wLength = 0) 
-					#ret = usb.control_transfer(self.dev, 0x40, self.SET_SRC, temp, (units<<8)|ch, 0, buffer)
+					self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_SRC, wValue = temp, wIndex = (units<<8)|ch)
 		else:
 			print "Illegal channel number specified.\n"
 
@@ -496,10 +484,7 @@ class smu():
 			if (vrange<0) or (vrange>3):
 				print "Illegal voltage range setting specified.\n"
 			else:
-				ret = self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_VRANGE, wValue = vrange, wIndex = ch)#, data_or_wLength = 0) 
-				#ret = usb.control_transfer(self.dev, 0x40, self.SET_VRANGE, vrange, ch, 0, buffer)
-				if ret<0:
-					print "Unable to send SET_VRANGE vendor request.\n"
+				self.dev.ctrl_transfer(bmRequestType = 0x40, bRequest = self.SET_VRANGE, wValue = vrange, wIndex = ch)
 		else:
 			print "Illegal channel number specified.\n"
 
