@@ -30,7 +30,6 @@ class smu():
 		self.LOAD_REF = 17
 		self.GET_ADC_KILL60HZ = 18
 		self.GET_MEAS_KILL60HZ = 19
-		self.GET_DISPLAY = 20
 
 		self.OFF = 0
 		self.ON = 1
@@ -138,52 +137,6 @@ class smu():
 				return ret[0]
 		else:
 			print "Illegal channel number specified.\n"
-
-	def get_display(self):
-		"""
-		GET_DISPLAY Support function for UPDATE_DISPLAY.
-		   GET_DISPLAY is support function for UPDATE_DISPLAY.  You will 
-		   probably not want to call it directly in your own scripts.
-		"""
-		buffer = self.dev.ctrl_transfer(bmRequestType = 0xC0, bRequest = self.GET_DISPLAY, wValue = 0, wIndex = 1, data_or_wLength = 24) 
-		ret = []
-		if buffer[5]==self.SRCV_MEASI:
-			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
-			value = self.get_src_vmult[buffer[4]]*value
-			ret.append(self.get_disp_srcv_fmt[buffer[4]] % value)
-			value = ((buffer[7]<<8)|buffer[6])-((buffer[9]<<8)|buffer[8])
-			value = self.get_meas_imult[buffer[10]]*value
-			ret.append(self.get_disp_measi_fmt[buffer[10]] % (self.get_disp_imult[buffer[10]]*value))
-		else:
-			value = ((buffer[1]<<8)|buffer[0])-((buffer[3]<<8)|buffer[2])
-			value = self.get_src_imult[buffer[4]]*value
-			ret.append(self.get_disp_srci_fmt[buffer[4]] % (self.get_disp_imult[buffer[4]]*value))
-			value = ((buffer[7]<<8)|buffer[6])-((buffer[9]<<8)|buffer[8])
-			value = self.get_meas_vmult[buffer[10]]*value
-			ret.append(self.get_disp_measv_fmt[buffer[10]] % value)
-		if buffer[11]==self.ON:
-			ret.append(u'AUTO')
-		else:
-			ret.append(u'	')
-		if buffer[17]==self.SRCV_MEASI:
-			value = ((buffer[13]<<8)|buffer[12])-((buffer[15]<<8)|buffer[14])
-			value = self.get_src_vmult[buffer[16]]*value
-			ret.append(self.get_disp_srcv_fmt[buffer[16]] % value)
-			value = ((buffer[19]<<8)|buffer[18])-((buffer[21]<<8)|buffer[20])
-			value = self.get_meas_imult[buffer[22]]*value
-			ret.append(self.get_disp_measi_fmt[buffer[22]] % (self.get_disp_imult[buffer[22]]*value))
-		else:
-			value = ((buffer[13]<<8)|buffer[12])-((buffer[15]<<8)|buffer[14])
-			value = self.get_src_imult[buffer[16]]*value
-			ret.append(self.get_disp_srci_fmt[buffer[16]] % (self.get_disp_imult[buffer[16]]*value))
-			value = ((buffer[19]<<8)|buffer[18])-((buffer[21]<<8)|buffer[20])
-			value = self.get_meas_vmult[buffer[22]]*value
-			ret.append(self.get_disp_measv_fmt[buffer[22]] % value)
-		if buffer[23]==self.ON:
-			ret.append(u'AUTO')
-		else:
-			ret.append(u'	')
-		return ret
 
 	def get_function(self, ch):
 		"""
