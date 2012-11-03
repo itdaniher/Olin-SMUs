@@ -7,9 +7,14 @@ buffer = []
 class smu():
 	def __init__(self):
 		"""pass smu class instantiation the number of the SMU you want to hook to - multiSMU support hack."""
-		#experimental SMU-zeroing-on-close hook
+
+		# experimental SMU-zeroing-on-close hook
 		atexit.register(self.zero)
+
+		# find SMU
 		self.dev = usb.core.find(idVendor=0x6666, idProduct=0xABCD)   
+
+		# magic numbers
 		self.SET_FN = 0
 		self.GET_FN = 1
 		self.SET_AUTORANGE = 2
@@ -57,10 +62,6 @@ class smu():
 		self.get_meas_imult = ( 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10 )
 		self.get_meas_vmult = ( 5e-3, 2e-3, 1e-3 )
 		self.get_disp_imult = ( 1e3, 1e3, 1e6, 1e6, 1e6, 1e9 )
-		self.get_disp_srci_fmt = ( u'Isrc=%+07.3fmA', u'Isrc=%+07.4fmA', u'Isrc=%+07.2f\u00B5A', u'Isrc=%+07.3f\u00B5A', u'Isrc=%+07.4f\u00B5A', u'Isrc=%+07.2fnA', u'Isrc=%+07.3fnA' )
-		self.get_disp_srcv_fmt = ( u'Vsrc=%+08.4fV', u'Vsrc=%+07.4fV ', u'Vsrc=%+07.4fV ' )
-		self.get_disp_measi_fmt = ( u'%+06.2fmA', u'%+06.3fmA', u'%+06.1f\u00B5A', u'%+06.2f\u00B5A', u'%+06.3f\u00B5A', u'%+06.1fnA', u'%+06.2fnA' )
-		self.get_disp_measv_fmt = ( u'%+07.3fV', u'%+06.3fV ', u'%+06.3fV ' )
 
 	def autorange(self, ch):
 		"""
@@ -376,41 +377,6 @@ class smu():
 		else:
 			print "Illegal channel number specified.\n"
 
-	def set_src_str(self, ch, str):
-		"""
-		SET_SRC_STR Set the source value of a given chanel from a string.
-		   SET_SRC_STR(CH, STR) sets the source value of chanel CH 
-		   to the value specified in the string STR.  Here CH can be 1 or 2.
-		   If STR contains units, the mode of chanel CH will change if 
-		   necessary.  The units can also include one of the following prefixes: 
-		   'm' for milli, 'u' for micro, 'n' for nano, and 'p' for pico.
-		"""
-		if len(str)!=0:
-			if (ch==1) or (ch==2):
-				fn = self.get_function(ch)
-				if (str[len(str)-1]=='A') or (str[len(str)-1]=='a'):
-					fn = 1
-					str = str[0:len(str)-1]
-				elif (str[len(str)-1]=='V') or (str[len(str)-1]=='v'):
-					fn = 0
-					str = str[0:len(str)-1]
-				mult = 1
-				if (str[len(str)-1]=='P') or (str[len(str)-1]=='p'):
-					mult = 1e-12
-					str = str[0:len(str)-1]
-				elif (str[len(str)-1]=='N') or (str[len(str)-1]=='n'):
-					mult = 1e-9
-					str = str[0:len(str)-1]
-				elif (str[len(str)-1]=='U') or (str[len(str)-1]=='u'):
-					mult = 1e-6
-					str = str[0:len(str)-1]
-				elif (str[len(str)-1]=='M') or (str[len(str)-1]=='m'):
-					mult = 1e-3
-					str = str[0:len(str)-1]
-				value = float(str)*mult
-				self.set_source(ch, value, fn)
-			else:
-				print "Illegal channel number specified.\n"
 
 	def set_voltage(self, ch, value):
 		"""
